@@ -1,0 +1,69 @@
+# redis configuration
+redis:
+  db: 0
+  addr: '127.0.0.1:6379'
+  password: ''
+
+# email configuration
+email:
+  to: 'xxx@qq.com'
+  port: 465
+  from: 'xxx@163.com'
+  host: 'smtp.163.com'
+  is-ssl: true
+  secret: 'xxx'
+  nickname: 'test'
+
+# system configuration
+system:
+  env: 'public'  # Change to "develop" to skip authentication for development mode
+  addr: 8888
+  db-type: 'mysql'
+  oss-type: 'local'    # 控制oss选择走本期还是 七牛等其他仓 自行增加其他oss仓可以在 server/utils/upload/upload.go 中 NewOss函数配置
+  use-multipoint: false
+  # IP限制次数 一个小时15000次
+  iplimit-count: 15000
+  #  IP限制一个小时
+  iplimit-time: 3600
+
+# captcha configuration
+captcha:
+  key-long: 6
+  img-width: 240
+  img-height: 80
+
+# mysql connect configuration
+# 未初始化之前请勿手动修改数据库信息！！！如果一定要手动初始化请看（https://www.bankroll.com/docs/first）
+mysql:
+  path: 127.0.0.1
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name: bankroll_way
+  username: root
+  password:
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: false
+  log-zap: ""
+
+# local configuration
+local:
+  path: './uploads/file/'
+
+# excel configuration
+excel:
+  dir: './resource/excel/'
+
+# timer task db clear table
+Timer:
+  start: true
+  spec: "@daily"  # 定时任务详细配置参考 https://pkg.go.dev/github.com/robfig/cron/v3
+  detail: [
+    # tableName: 需要清理的表名
+    # compareField: 需要比较时间的字段
+    # interval: 时间间隔, 具体配置详看 time.ParseDuration() 中字符串表示 且不能为负数
+    # 2160h = 24 * 30 * 3 -> 三个月
+    { tableName: "sys_operation_records" , compareField: "created_at", interval: "2160h" },
+    { tableName: "jwt_blacklists" , compareField: "created_at", interval: "168h" }
+    #{ tableName: "log2" , compareField: "created_at", interval: "2160h" }
+  ]
+
