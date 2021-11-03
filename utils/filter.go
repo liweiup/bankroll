@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"bankroll/config"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -32,4 +34,30 @@ func ConvertToBin(num int) int {
 	}
 	rNum,_ := strconv.Atoi(s)
 	return rNum
+}
+
+/**
+金额转成数字
+ */
+func ConverMoney(m string) float64 {
+	//取出数字
+	preg,_ := regexp.Compile(`[-(0-9)|\.]*`)
+	num, _ := strconv.ParseFloat(preg.FindString(m),64)
+	if strings.LastIndex(m,"亿") != -1 {
+		num *= float64(ConvertToBin(config.YiYi))
+		return num
+	}
+	if strings.LastIndex(m,"千万") != -1 {
+		num *= float64(ConvertToBin(config.QianWan))
+		return num
+	}
+	if strings.LastIndex(m,"百万") != -1 {
+		num *= float64(ConvertToBin(config.BaiWan))
+		return num
+	}
+	if strings.LastIndex(m,"万") != -1 {
+		num *= float64(ConvertToBin(config.Wan))
+		return num
+	}
+	return 0
 }
