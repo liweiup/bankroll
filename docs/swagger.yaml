@@ -1,0 +1,16 @@
+info:
+  contact: {}
+paths:
+  /api/getPlateBankrollData:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          schema:
+            type: string
+      summary: 创建基础api
+swagger: "2.0"

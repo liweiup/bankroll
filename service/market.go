@@ -1,12 +1,16 @@
 package service
 
 import (
+	"bankroll/config"
+	"bankroll/global"
 	"bankroll/utils"
+	"context"
 	"fmt"
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 type FundType string
 const (
@@ -16,8 +20,13 @@ const (
 	IndustryStock FundType = "ggzjld" //个股详细数据
 )
 var hd HandleDataInfo
-//获取 个股|行业|概念 资金数据
+ //获取 个股|行业|概念 资金数据
 func MarketGetBankRoll(fundType FundType,field string,page,size int) *HandleDataInfo {
+	//节假日跳过
+	dEx,_ := global.GVA_REDIS.SIsMember(context.Background(),"BK:HOLIDAY",time.Now().Format(config.LayoutDate)).Result()
+	if dEx {
+		return nil
+	}
 	strResUrl := fmt.Sprintf("http://data.10jqka.com.cn/funds/%s/field/%s/order/desc/ajax/1/free/1/page/%d/size/%d",fundType,field,page,size)
 	header := map[string]string{
 		"hexin-v" : getHexinV(),
@@ -31,7 +40,7 @@ func MarketGetBankRoll(fundType FundType,field string,page,size int) *HandleData
 			if fundType == Conception {
 				ftype = "gn" //概念
 			}
-			MarketGetIndividualStock(ftype,"19",v.IndustryCode,1,5)
+			MarketGetIndividualStock(ftype,"19",v.IndustryCode,1,200)
 		}
 	}
 	if err != nil {
@@ -46,12 +55,12 @@ func MarketGetIndividualStock(ft,field,code string,page,size int) {
 	header := map[string]string{
 		"hexin-v" : getHexinV(),
 	}
-	log.Printf("个股数据临时hexin-v：%s  url: %s",header["hexin-v"],strResUrl)
-	//resBody,err := utils.HttpGetRequest(strResUrl,nil,header)
-	//hd.HandleSwitch(IndustryStock,resBody);
-	//if err != nil {
-	//	log.Println(err.Error())
-	//}
+	//log.Printf("个股数据临时hexin-v：%s  url: %s",header["hexin-v"],strResUrl)
+	resBody,err := utils.HttpGetRequest(strResUrl,nil,header)
+	hd.HandleSwitch(IndustryStock,resBody,code);
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 
 func getHexinV() string{

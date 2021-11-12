@@ -19,8 +19,8 @@ func RunWindowsServer() {
 		initialize.Redis()
 	}
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
-	s := initServer(address, gin.Default())
-	time.Sleep(10 * time.Microsecond)
+	router := initialize.Routers()
+	s := initServer(address, router)
 	global.GVA_LOG.Error(s.ListenAndServe().Error())
 }
 

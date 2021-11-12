@@ -2,10 +2,14 @@ package utils
 
 import (
 	"bankroll/config"
+	"bankroll/global"
+	"context"
+	"fmt"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 /**
@@ -60,4 +64,80 @@ func ConverMoney(m string) float64 {
 		return num
 	}
 	return 0
+}
+/**
+获取两个日期间的所有日期
+ */
+func SplitDate(beginDate, endDate, format string) []string {
+	bDate, _ := time.ParseInLocation(format, beginDate, time.Local)
+	eDate, _ := time.ParseInLocation(format, endDate, time.Local)
+	day := int(eDate.Sub(bDate).Hours() / 24)
+	dlist := make([]string, 0)
+	dlist = append(dlist, beginDate)
+	for i := 1; i < day; i++ {
+		result := bDate.AddDate(0, 0, i)
+		dlist = append(dlist, result.Format(format))
+	}
+	if beginDate != endDate {
+		dlist = append(dlist, endDate)
+	}
+	return dlist
+}
+
+/**
+返回一个排除节假日和周末的周期
+ */
+func getDayFilterHoli(currentSDate,currentEDate time.Time) (sDateStr,EDateStr string) {
+	currentSDateStr := currentSDate.Format(config.LayoutDate)
+	//结束时间
+	currentEDateStr := currentEDate.Format(config.LayoutDate)
+	//间隔日期
+	curlist := SplitDate(currentSDateStr, currentEDateStr, config.LayoutDate)
+	cdayNum := 0
+	for i,cudate := range curlist {
+		//去除周六周天 节假日
+		fdate, _ := time.Parse(config.LayoutDate,cudate);
+		dEx,_ := global.GVA_REDIS.SIsMember(context.Background(),"BK:HOLIDAY",cudate).Result()
+		//周六推移两天，周天和节假日推一天
+		if fdate.Weekday() == time.Sunday || fdate.Weekday() == time.Saturday || dEx {
+			cdayNum ++
+		}
+		if i == 0 && fdate.Weekday() == time.Sunday {
+			cdayNum ++
+		}
+	}
+	currentSDate = currentSDate.AddDate(0,0,-cdayNum)
+	currentSDateStr =  currentSDate.Format(config.LayoutDate)
+	return currentSDateStr,currentEDateStr
+}
+/**
+根据时间返回一个周期
+conpareNum 几天时间
+periodNum 多少个周期
+ */
+func GetPeriodByOneday(dateStr string,conpareNum,periodNum int) [][]string {
+	periodArr := [][]string{}
+	sfdate :=  ""
+	for i := 0; i < periodNum; i++ {
+		if i== 0 {
+			currentEDate,_ := time.ParseInLocation(config.LayoutDate,dateStr,time.Local);
+			//当前日期天 - 统计天数 + 1 = 统计开始时间
+			currentSDate := currentEDate.AddDate(0, 0, -conpareNum + 1)
+			currentSDateStr,currentEDateStr := getDayFilterHoli(currentSDate,currentEDate)
+			sfdate = currentSDateStr
+			fmt.Println(currentSDateStr,currentEDateStr)
+			fdArr := []string{currentSDateStr,currentEDateStr}
+			periodArr = append(periodArr,fdArr)
+			continue
+		}
+		currentSDate, _ := time.Parse(config.LayoutDate,sfdate)
+		//上一个周期的时间
+		prevSdate := currentSDate.AddDate(0,0,-conpareNum)
+		prevEdate := currentSDate.AddDate(0,0,-1)
+		prevSDateStr,prevEDateStr := getDayFilterHoli(prevSdate,prevEdate)
+		sfdate = prevSDateStr
+		fdArr := []string{prevSDateStr,prevEDateStr}
+		periodArr = append(periodArr,fdArr)
+	}
+	return periodArr
 }

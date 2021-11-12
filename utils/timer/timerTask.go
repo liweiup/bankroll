@@ -1,8 +1,8 @@
 package timer
 
 import (
-	"sync"
 	"github.com/robfig/cron/v3"
+	"sync"
 )
 
 type Timer interface {
@@ -39,6 +39,7 @@ func (t *timer) AddTaskByFunc(taskName string, spec string, task func()) (cron.E
 	}
 	id, err := t.taskList[taskName].AddFunc(spec, task)
 	t.taskList[taskName].Start()
+
 	return id, err
 }
 

@@ -15,4 +15,8 @@ type Server struct {
 const (
 	ConfigEnv  = "GVA_CONFIG"
 	ConfigFile = "config.yaml"
+	LayoutDate = "2006-01-02"
+	LayoutTime = "2006-01-02 15:04:05"
+	RedisKey = "BK:"
+	HolidaySet = RedisKey+"HOLIDAY"
 )
