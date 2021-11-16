@@ -46,11 +46,11 @@ mysql:
 
 # local configuration
 local:
-  path: './uploads/file/'
+  path: './local/'
 
 # excel configuration
 excel:
-  dir: './resource/excel/'
+  dir: './excel/'
 
 # timer task db clear table
 Timer:

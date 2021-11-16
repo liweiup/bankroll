@@ -4,7 +4,6 @@ import (
 	"bankroll/config"
 	"bankroll/global"
 	"context"
-	"fmt"
 	"log"
 	"regexp"
 	"strconv"
@@ -115,28 +114,30 @@ func getDayFilterHoli(currentSDate,currentEDate time.Time) (sDateStr,EDateStr st
 conpareNum 几天时间
 periodNum 多少个周期
  */
-func GetPeriodByOneday(dateStr string,conpareNum,periodNum int) [][]string {
+func GetPeriodByOneday(dateStr string,compareNum,periodNum int) [][]string {
 	periodArr := [][]string{}
 	sfdate :=  ""
 	for i := 0; i < periodNum; i++ {
+		fdArr := []string{}
 		if i== 0 {
 			currentEDate,_ := time.ParseInLocation(config.LayoutDate,dateStr,time.Local);
 			//当前日期天 - 统计天数 + 1 = 统计开始时间
-			currentSDate := currentEDate.AddDate(0, 0, -conpareNum + 1)
+			currentSDate := currentEDate.AddDate(0, 0, -compareNum + 1)
 			currentSDateStr,currentEDateStr := getDayFilterHoli(currentSDate,currentEDate)
 			sfdate = currentSDateStr
-			fmt.Println(currentSDateStr,currentEDateStr)
-			fdArr := []string{currentSDateStr,currentEDateStr}
+			fdArr = []string{currentSDateStr,currentEDateStr}
 			periodArr = append(periodArr,fdArr)
 			continue
 		}
+		//println(sfdate)
+		//println("=================")
 		currentSDate, _ := time.Parse(config.LayoutDate,sfdate)
 		//上一个周期的时间
-		prevSdate := currentSDate.AddDate(0,0,-conpareNum)
+		prevSdate := currentSDate.AddDate(0,0,-compareNum)
 		prevEdate := currentSDate.AddDate(0,0,-1)
 		prevSDateStr,prevEDateStr := getDayFilterHoli(prevSdate,prevEdate)
 		sfdate = prevSDateStr
-		fdArr := []string{prevSDateStr,prevEDateStr}
+		fdArr = []string{prevSDateStr,prevEDateStr}
 		periodArr = append(periodArr,fdArr)
 	}
 	return periodArr

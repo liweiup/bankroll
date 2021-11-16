@@ -2,4 +2,4 @@ package api
 
 import "bankroll/service/mapper"
 
-var bankrollModel = mapper.BankrollModel
+var DataInfo = new(mapper.DataInfo)

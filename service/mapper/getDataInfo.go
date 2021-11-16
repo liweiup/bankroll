@@ -1,20 +1,30 @@
 package mapper
 
 import (
-	"bankroll/global"
+	"bankroll/service/api/requestParam"
 	"bankroll/service/model"
+	"bankroll/utils"
 )
 
-type Bankroll struct {}
+type DataInfo struct {}
 
-var BankrollModel = new(Bankroll)
-
-//-- 查询板块交易额
-func (bankroll *Bankroll) GetPlateBankroll(sdate,edate string) ([]model.BankrollPlate,error) {
-	var boP = []model.BankrollPlate{}
-	r := global.GVA_DB.Raw("select ib.industry_code, ib.industry_name, sum(fund_real_in) as fund_real_in, sum(ob_price) as ob_price, count(*) as count_num from industry_bankroll ib inner join individual_stock s on ib.industry_code = s.industry_code where ib.c_date between date_sub(?, INTERVAL 0 DAY) and date_sub(?, INTERVAL 0 DAY) group by ib.industry_code order by ob_price desc",sdate,edate).Scan(&boP)
-	if r.Error != nil {
-		return nil,r.Error
+//-- 查询板块交易额变化
+func (bankroll *DataInfo) GetPlateBankroll(backrollparam requestParam.BankrollParam) (map[string][]model.BankrollPlate,error) {
+	//获取时间段
+	periodArr := utils.GetPeriodByOneday(backrollparam.Cdate,backrollparam.CompareNum,backrollparam.PeriodNum)
+	dMap := make(map[string][]model.BankrollPlate)
+	for _, v := range periodArr {
+		//获取数据
+		plateBankroll, err := bankrollPlateModel.GetPlateBankroll(v[0],v[1],backrollparam.FundType)
+		if err != nil {
+			return nil, err
+		}
+		for _, v1 := range plateBankroll {
+			if _, ok := dMap[v1.IndustryCode]; !ok {
+				dMap[v1.IndustryCode] = []model.BankrollPlate{}
+			}
+			dMap[v1.IndustryCode] = append(dMap[v1.IndustryCode],v1)
+		}
 	}
-	return boP,r.Error
+	return dMap,nil
 }

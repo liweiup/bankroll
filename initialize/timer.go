@@ -8,12 +8,11 @@ import (
 
 func Timer() {
 	id, _ := global.GVA_Timer.AddTaskByFunc("test", "0/20 16 * * 1-5", func() {
-	//id, _ := global.GVA_Timer.AddTaskByFunc("test", "0/20 16 * * ? ", func() {
 		service.MarketGetBankRoll(service.Industry,"je",1,100)
 	})
 	global.GVA_LOG.Warn(fmt.Sprintf("Industry添加定时任务Id：%d ",id))
 	id, _ = global.GVA_Timer.AddTaskByFunc("test", "0/20 17 * * 1-5", func() {
-		service.MarketGetBankRoll(service.Conception,"je",1,100)
+		service.MarketGetBankRoll(service.Conception,"je",1,300)
 	})
 	global.GVA_LOG.Warn(fmt.Sprintf("Conception添加定时任务Id：%d ",id))
 	id, _ = global.GVA_Timer.AddTaskByFunc("test", "0/20 18 * * 1-5", func() {

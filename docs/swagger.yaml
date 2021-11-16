@@ -1,16 +1,39 @@
+definitions:
+  requestParam.BankrollParam:
+    properties:
+      cdate:
+        type: string
+      compareNum:
+        type: integer
+      edate:
+        type: string
+      periodNum:
+        type: integer
+      sdate:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
   /api/getPlateBankrollData:
-    post:
+    get:
       consumes:
       - application/json
+      parameters:
+      - description: 开始时间 结束时间 比对几天 周期
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/requestParam.BankrollParam'
       produces:
       - application/json
       responses:
         "200":
-          description: '{"success":true,"data":{},"msg":"创建成功"}'
+          description: '{"success":true,"data":{},"msg":"succ"}'
           schema:
             type: string
-      summary: 创建基础api
+      summary: 查询板块交易额
+      tags:
+      - rollback
 swagger: "2.0"

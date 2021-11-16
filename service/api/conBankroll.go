@@ -2,7 +2,9 @@ package api
 
 import (
 	"bankroll/global"
+	"bankroll/service/api/requestParam"
 	"bankroll/service/common/response"
+	"bankroll/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -10,13 +12,21 @@ import (
 type BankrollApi struct {
 }
 
-// @Summary 创建基础api
+// @Tags rollback
+// @Summary 查询板块交易额
 // @accept application/json
 // @Produce application/json
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
+// @Param data body requestParam.BankrollParam true "开始时间 结束时间 比对几天 周期"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"succ"}"
 // @Router /api/getPlateBankrollData [post]
 func (bk *BankrollApi) GetPlateBankrollData(c *gin.Context) {
-	if data,err := bankrollModel.GetPlateBankroll("2021-11-05","2021-11-05"); err != nil {
+	var backrollparam requestParam.BankrollParam
+	_ = c.ShouldBindJSON(&backrollparam)
+	if err := utils.Verify(backrollparam, GetPlateBankrollData); err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if data,err := DataInfo.GetPlateBankroll(backrollparam); err != nil {
 		global.GVA_LOG.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
