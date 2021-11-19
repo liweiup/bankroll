@@ -28,7 +28,7 @@ func (bk *BankrollApi) GetPlateBankrollData(c *gin.Context) {
 		return
 	}
 	if data,err := DataInfo.GetPlateBankroll(backrollparam); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Any("err", err))
+		global.Zlog.Error("获取失败!", zap.Any("err", err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(data, "获取成功", c)

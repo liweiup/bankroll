@@ -13,10 +13,10 @@ type server interface {
 }
 
 func RunWindowsServer() {
-	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
+	address := fmt.Sprintf(":%d", global.Config.System.Addr)
 	router := Routers()
 	s := initServer(address, router)
-	global.GVA_LOG.Error(s.ListenAndServe().Error())
+	global.Zlog.Error(s.ListenAndServe().Error())
 }
 
 func initServer(address string, router *gin.Engine) server {

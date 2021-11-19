@@ -1,8 +1,8 @@
-package redigo_pack
+package redigo
 
 import "bankroll/global"
 
-type redigoPack struct {
+type dtype struct {
 	String stringRds
 	List   listRds
 	Hash   hashRds
@@ -12,7 +12,8 @@ type redigoPack struct {
 	Bit    bitRds
 	Db     dbRds
 }
-var RedigoConn = new(redigoPack)
+var Dtype = new(dtype)
 
-var Pool = global.GVA_REDIS
+var Pool = &global.Redigo
+
 

@@ -23,7 +23,7 @@ type HandleDataInfo struct {
 func (hd *HandleDataInfo) HandleSwitch(fundType FundType,resBody string, sp ...interface{}) {
 	doc,err := goquery.NewDocumentFromReader(strings.NewReader(resBody))
 	if err != nil {
-		global.GVA_LOG.Error(err.Error())
+		global.Zlog.Error(err.Error())
 		return
 	}
 	switch fundType {
@@ -67,9 +67,9 @@ func (hd *HandleDataInfo) handleIndustryData(fundType FundType,doc *goquery.Docu
 		hd.industryBankrolls = append(hd.industryBankrolls,industryBankroll)
 	})
 	if len(hd.industryBankrolls) > 0 {
-		err := global.GVA_DB.Save(&hd.industryBankrolls).Error
+		err := global.Gdb.Save(&hd.industryBankrolls).Error
 		if err != nil {
-			global.GVA_LOG.Error(err.Error())
+			global.Zlog.Error(err.Error())
 		}
 	}
 
@@ -93,9 +93,9 @@ func (hd *HandleDataInfo) handleIndividualData(fundType FundType,doc *goquery.Do
 		hd.individualBankrolls = append(hd.individualBankrolls,individualBankroll)
 	})
 	if len(hd.individualBankrolls) > 0 {
-		err := global.GVA_DB.Save(&hd.individualBankrolls).Error
+		err := global.Gdb.Save(&hd.individualBankrolls).Error
 		if err != nil {
-			global.GVA_LOG.Warn(err.Error())
+			global.Zlog.Warn(err.Error())
 		}
 	}
 }
@@ -129,9 +129,9 @@ func (hd *HandleDataInfo) handleIndividualStockData(fundType FundType,doc *goque
 		hd.individualStocks = append(hd.individualStocks,individualStock)
 	})
 	if len(hd.individualStocks) > 0 {
-		err := global.GVA_DB.Save(&hd.individualStocks).Error
+		err := global.Gdb.Save(&hd.individualStocks).Error
 		if err != nil {
-			global.GVA_LOG.Warn(err.Error())
+			global.Zlog.Warn(err.Error())
 		}
 	}
 }

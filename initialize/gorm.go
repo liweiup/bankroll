@@ -10,7 +10,7 @@ import (
 )
 
 func Gorm() *gorm.DB {
-	dbType := global.GVA_CONFIG.System.DbType
+	dbType := global.Config.System.DbType
 	switch dbType {
 	case "mysql":
 		return GormMysql()
@@ -23,9 +23,9 @@ func Gorm() *gorm.DB {
  初始化数据库
  */
 func GormMysql() *gorm.DB {
-	m := global.GVA_CONFIG.Mysql
+	m := global.Config.Mysql
 	if m.Dbname == "" {
-		global.GVA_LOG.Info("no db")
+		global.Zlog.Info("no db")
 	}
 	dsn := m.Username + ":" + m.Password + "@tcp(" + m.Path + ")/" + m.Dbname + "?" + m.Config
 	mysqlConfig := mysql.Config{
@@ -37,7 +37,7 @@ func GormMysql() *gorm.DB {
 		SkipInitializeWithVersion: false, // 根据版本自动配置
 	}
 	if db, err := gorm.Open(mysql.New(mysqlConfig), gormConfig()); err != nil {
-		global.GVA_LOG.Error("MySQL启动异常", zap.Any("err", err))
+		global.Zlog.Error("MySQL启动异常", zap.Any("err", err))
 		return nil
 	} else {
 		sqlDB, _ := db.DB()
@@ -55,7 +55,7 @@ func GormMysql() *gorm.DB {
 //@return: *gorm.Config
 func gormConfig() *gorm.Config {
 	config := &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true}
-	switch global.GVA_CONFIG.Mysql.LogMode {
+	switch global.Config.Mysql.LogMode {
 	case "silent", "Silent":
 		config.Logger = Default.LogMode(logger.Silent)
 	case "error", "Error":

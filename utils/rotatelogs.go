@@ -21,7 +21,7 @@ func GetWriteSyncer(file string) zapcore.WriteSyncer {
 		Compress:   true, //是否压缩/归档旧文件
 	}
 
-	if global.GVA_CONFIG.Zap.LogInConsole {
+	if global.Config.Zap.LogInConsole {
 		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(lumberJackLogger))
 	}
 	return zapcore.AddSync(lumberJackLogger)

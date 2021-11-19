@@ -33,15 +33,15 @@ func Viper(path ...string) *viper.Viper {
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("config file changed:", e.Name)
-		if err := v.Unmarshal(&global.GVA_CONFIG); err != nil {
+		if err := v.Unmarshal(&global.Config); err != nil {
 			fmt.Println(err)
 		}
 	})
-	global.BlackCache = local_cache.NewCache(
+	global.Bcache = local_cache.NewCache(
 		local_cache.SetDefaultExpire(time.Second * time.Duration(3600)),
 	)
 	// 将文件内容解析后封装到global对象中
-	if err := v.Unmarshal(&global.GVA_CONFIG); err != nil {
+	if err := v.Unmarshal(&global.Config); err != nil {
 		fmt.Println(err)
 	}
 	return v

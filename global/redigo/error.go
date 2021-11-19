@@ -1,4 +1,4 @@
-package redigo_pack
+package redigo
 
 import (
 	"fmt"

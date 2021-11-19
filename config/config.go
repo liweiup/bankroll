@@ -13,7 +13,7 @@ type Server struct {
 }
 
 const (
-	ConfigEnv  = "GVA_CONFIG"
+	ConfigEnv  = "Config"
 	ConfigFile = "config.yaml"
 	LayoutDate = "2006-01-02"
 	LayoutTime = "2006-01-02 15:04:05"

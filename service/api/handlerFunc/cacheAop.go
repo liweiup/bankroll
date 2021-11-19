@@ -2,7 +2,7 @@ package handlerFunc
 
 import (
 	"bankroll/config"
-	"bankroll/service/api"
+	"bankroll/global/redigo"
 	"bankroll/service/common/response"
 	"bytes"
 	"crypto/md5"
@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"time"
 )
 
 type responseBodyWriter struct {
@@ -36,7 +35,7 @@ func CacheAop() gin.HandlerFunc {
 		key := fmt.Sprintf("%x", md5.Sum(mjson))
 		//获取数据
 		var data response.Response
-		err := api.RedisCache.Get(config.CacheSet+key,data)
+		_,err := redigo.Dtype.String.Get(config.CacheSet+key).String()
 		//如果存在数据
 		if err == nil {
 			response.OkWithDetailed(data,"succ",c)
@@ -48,7 +47,7 @@ func CacheAop() gin.HandlerFunc {
 		c.Writer = w
 		c.Next()
 		//after 设置缓存
-		api.RedisCache.Set(config.CacheSet+key,w.body.String(),time.Hour * 2)
+		redigo.Dtype.String.Set(config.CacheSet+key,w.body.String())
 	}
 	return fun
 }

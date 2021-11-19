@@ -18,7 +18,7 @@ var apiRouterApi = new(api.BankrollApi)
 // 初始化总路由
 func Routers() *gin.Engine {
 	var Router = gin.Default()
-	Router.StaticFS(global.GVA_CONFIG.Local.Path, http.Dir(global.GVA_CONFIG.Local.Path)) // 为用户头像和文件提供静态地址
+	Router.StaticFS(global.Config.Local.Path, http.Dir(global.Config.Local.Path)) // 为用户头像和文件提供静态地址
 	// 跨域
 	Router.Use(Cors()) // 如需跨域可以打开
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

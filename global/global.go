@@ -3,7 +3,6 @@ package global
 import (
 	"bankroll/config"
 	"bankroll/utils/timer"
-	//"github.com/go-redis/redis/v8"
 	"github.com/garyburd/redigo/redis"
 	"github.com/songzhibin97/gkit/cache/local_cache"
 	"github.com/spf13/viper"
@@ -12,11 +11,11 @@ import (
 )
 
 var (
-	GVA_DB     *gorm.DB
-	GVA_REDIS  *redis.Pool
-	GVA_Timer  timer.Timer = timer.NewTimerTask()
-	GVA_CONFIG config.Server
-	GVA_VP     *viper.Viper
-	GVA_LOG    *zap.Logger
-	BlackCache local_cache.Cache
+	Gdb     *gorm.DB
+	Redigo  *redis.Pool
+	Timer  timer.Timer = timer.NewTimerTask()
+	Config config.Server
+	Viper     *viper.Viper
+	Zlog    *zap.Logger
+	Bcache local_cache.Cache
 )

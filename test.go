@@ -52,6 +52,6 @@ func addDate()  {
 	dateArr = append(dateArr, "2022-10-06")
 	dateArr = append(dateArr, "2022-10-07")
 	for _, s := range dateArr {
-		global.GVA_REDIS.SAdd(context.Background(),"BK:HOLIDAY",s)
+		global.Redigo.SAdd(context.Background(),"BK:HOLIDAY",s)
 	}
 }
