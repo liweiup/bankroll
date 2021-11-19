@@ -1,16 +1,12 @@
 package service
 
 import (
-	"bankroll/config"
-	"bankroll/global"
 	"bankroll/utils"
-	"context"
 	"fmt"
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 )
 type FundType string
 const (
@@ -23,7 +19,8 @@ var hd HandleDataInfo
  //获取 个股|行业|概念 资金数据
 func MarketGetBankRoll(fundType FundType,field string,page,size int) *HandleDataInfo {
 	//节假日跳过
-	dEx,_ := global.GVA_REDIS.SIsMember(context.Background(),"BK:HOLIDAY",time.Now().Format(config.LayoutDate)).Result()
+	//dEx,err := global.GVA_REDIS.SIsMember(context.Background(),"BK:HOLIDAY",time.Now().Format(config.LayoutDate)).Result()
+	dEx := false
 	if dEx {
 		return nil
 	}

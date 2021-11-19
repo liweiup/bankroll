@@ -1,8 +1,8 @@
 package utils
 import (
 	"bankroll/global"
+	"go.uber.org/zap"
 	"os"
-"go.uber.org/zap"
 )
 
 //@author: [piexlmax](https://github.com/piexlmax)

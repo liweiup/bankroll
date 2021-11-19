@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"bankroll/global"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -8,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"bankroll/global"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 )

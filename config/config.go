@@ -19,4 +19,5 @@ const (
 	LayoutTime = "2006-01-02 15:04:05"
 	RedisKey = "BK:"
 	HolidaySet = RedisKey+"HOLIDAY"
+	CacheSet = RedisKey+"CACHE:"
 )

@@ -4,6 +4,7 @@ import (
 	_ "bankroll/docs"
 	"bankroll/global"
 	"bankroll/service/api"
+	"bankroll/service/api/handlerFunc"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -21,8 +22,7 @@ func Routers() *gin.Engine {
 	// 跨域
 	Router.Use(Cors()) // 如需跨域可以打开
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	Router.Group("api").POST("getPlateBankrollData",apiRouterApi.GetPlateBankrollData)
+	Router.Group("api").POST("getPlateBankrollData",handlerFunc.CacheAop(),apiRouterApi.GetPlateBankrollData)
 	return Router
 }
 

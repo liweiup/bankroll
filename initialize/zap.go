@@ -4,10 +4,10 @@ import (
 	"bankroll/global"
 	"bankroll/utils"
 	"fmt"
-	"os"
-	"time"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
+	"time"
 )
 
 func Zap() (logger *zap.Logger) {

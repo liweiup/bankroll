@@ -1,6 +1,7 @@
 package response
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -10,7 +11,12 @@ type Response struct {
 	Data interface{} `json:"data"`
 	Msg  string      `json:"msg"`
 }
-
+func (m *Response) MarshalBinary() ([]byte, error) {
+	return json.Marshal(m)
+}
+func (m *Response) UnMarshalBinary(s string,i *interface{}) error {
+	return json.Unmarshal([]byte(s),i)
+}
 const (
 	ERROR   = 7
 	SUCCESS = 0

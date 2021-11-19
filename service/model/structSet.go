@@ -1,13 +1,9 @@
 package model
 
-import (
-	"bankroll/global"
-)
-
 //序号	行业	行业指数	涨跌幅	流入资金(亿)	流出资金(亿)	净额(亿)	公司家数	领涨股	涨跌幅	当前价(元)
 //行业资金
 type IndustryBankroll struct {
-	global.GVA_MODEL
+	GVA_MODEL
 	FundType int `json:"fund_type"`
 	DayNum int `json:"day_num"`
 	IndustryCode string `json:"industry_code"`
@@ -30,7 +26,7 @@ func (IndustryBankroll) TableName() string {
 //序号	股票代码	股票简称	最新价	涨跌幅	换手率	流入资金(元)	流出资金(元)	净额(元)	成交额(元)
 //个股资金流
 type IndividualBankroll struct {
-	global.GVA_MODEL
+	GVA_MODEL
 	DayNum int `json:"day_num"`
 	IndividualCode string `json:"individual_code"`
 	IndividualName string `json:"individual_name"`
@@ -50,7 +46,7 @@ func (IndividualBankroll) TableName() string {
 //序号 代码 名称 现价 涨跌幅(%) 换手(%) 量比 振幅(%) 成交额 流通股 流通市值 市盈率
 //个股信息
 type IndividualStock struct {
-	global.GVA_MODEL
+	GVA_MODEL
 	IndustryCode string `json:"industry_code"`
 	IndividualCode string `json:"individual_code"`
 	IndividualName string `json:"individual_name"`

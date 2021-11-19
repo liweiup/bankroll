@@ -1,8 +1,7 @@
-package core
+package initialize
 
 import (
 	"bankroll/global"
-	"bankroll/initialize"
 	"fmt"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
@@ -14,12 +13,8 @@ type server interface {
 }
 
 func RunWindowsServer() {
-	if global.GVA_CONFIG.System.UseMultipoint {
-		// 初始化redis服务
-		initialize.Redis()
-	}
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
-	router := initialize.Routers()
+	router := Routers()
 	s := initServer(address, router)
 	global.GVA_LOG.Error(s.ListenAndServe().Error())
 }

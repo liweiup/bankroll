@@ -6,6 +6,7 @@ import (
 	"bankroll/service/common/response"
 	"bankroll/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +22,7 @@ type BankrollApi struct {
 // @Router /api/getPlateBankrollData [post]
 func (bk *BankrollApi) GetPlateBankrollData(c *gin.Context) {
 	var backrollparam requestParam.BankrollParam
-	_ = c.ShouldBindJSON(&backrollparam)
+	_ = c.ShouldBindBodyWith(&backrollparam,binding.JSON)
 	if err := utils.Verify(backrollparam, GetPlateBankrollData); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return

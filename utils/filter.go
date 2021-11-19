@@ -2,8 +2,6 @@ package utils
 
 import (
 	"bankroll/config"
-	"bankroll/global"
-	"context"
 	"log"
 	"regexp"
 	"strconv"
@@ -96,8 +94,9 @@ func getDayFilterHoli(currentSDate,currentEDate time.Time) (sDateStr,EDateStr st
 	for i,cudate := range curlist {
 		//去除周六周天 节假日
 		fdate, _ := time.Parse(config.LayoutDate,cudate);
-		dEx,_ := global.GVA_REDIS.SIsMember(context.Background(),"BK:HOLIDAY",cudate).Result()
+		//dEx,_ := global.GVA_REDIS.SIsMember(context.Background(),"BK:HOLIDAY",cudate).Result()
 		//周六推移两天，周天和节假日推一天
+		dEx := false
 		if fdate.Weekday() == time.Sunday || fdate.Weekday() == time.Saturday || dEx {
 			cdayNum ++
 		}

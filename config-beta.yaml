@@ -35,9 +35,9 @@ captcha:
 
 # mysql connect configuration
 mysql:
-  path: 172.17.0.1
+#  path: 172.17.0.1
 #  port: 3306
-#  path: 123.58.213.158
+  path: 123.58.213.158
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: bankroll_way
   username: root
@@ -49,11 +49,11 @@ mysql:
 
 # local configuration
 local:
-  path: '/'
+  path: '/root/go/upload'
 
 # excel configuration
 excel:
-  dir: '/'
+  dir: '/root/go/upload'
 
 # timer task db clear table
 Timer:
