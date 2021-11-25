@@ -17,6 +17,8 @@ type HandleDataInfo struct {
 	industryBankrolls []model.IndustryBankroll
 	individualBankrolls []model.IndividualBankroll
 	individualStocks []model.IndividualStock
+	plateBankrolls []model.PlateBankroll
+	relatDusDivs []model.RelatDusDiv
 }
 
 //分发
@@ -32,9 +34,11 @@ func (hd *HandleDataInfo) HandleSwitch(fundType FundType,resBody string, sp ...i
 	case Industry:
 		hd.handleIndustryData(fundType,doc)
 	case Individual:
-		hd.handleIndividualData(fundType,doc)
+		hd.handleIndividualData(doc)
 	case IndustryStock:
-		hd.handleIndividualStockData(fundType,doc,&sp)
+		hd.handleIndividualStockData(doc,&sp)
+	case Plate:
+		hd.handlePlateData(doc)
 	default:
 
 	}
@@ -59,9 +63,6 @@ func (hd *HandleDataInfo) handleIndustryData(fundType FundType,doc *goquery.Docu
 		industryBankroll.FundRealIn,_ = strconv.ParseFloat(s.Children().Eq(6).Text(),64)
 		industryBankroll.FundRealIn *= float64(utils.ConvertToBin(config.YiYi))
 		industryBankroll.CompanyNum, _ = strconv.Atoi(s.Children().Eq(7).Text())
-		industryBankroll.LeaderCompanyName,industryBankroll.LeaderCompanyCode = getCodeAndName(s,8)
-		industryBankroll.LeaderRoseRatio = utils.PercentNumToFloat(s.Children().Eq(9).Text())
-		industryBankroll.LeaderPrice, _ = strconv.ParseFloat(s.Children().Eq(10).Text(),64)
 		industryBankroll.CDate = time.Now().Format(config.DayOut)
 		industryBankroll.FundType = fundTypeNum
 		hd.industryBankrolls = append(hd.industryBankrolls,industryBankroll)
@@ -75,7 +76,7 @@ func (hd *HandleDataInfo) handleIndustryData(fundType FundType,doc *goquery.Docu
 
 }
 //处理个股资金数据
-func (hd *HandleDataInfo) handleIndividualData(fundType FundType,doc *goquery.Document) {
+func (hd *HandleDataInfo) handleIndividualData(doc *goquery.Document) {
 	hd.individualBankrolls = []model.IndividualBankroll{}
 
 	doc.Find("tbody").Find("tr").Each(func(i int, s *goquery.Selection) {
@@ -101,12 +102,19 @@ func (hd *HandleDataInfo) handleIndividualData(fundType FundType,doc *goquery.Do
 }
 
 //处理个股详细数据
-func (hd *HandleDataInfo) handleIndividualStockData(fundType FundType,doc *goquery.Document,sp *[]interface{}) {
+func (hd *HandleDataInfo) handleIndividualStockData(doc *goquery.Document,sp *[]interface{}) {
 	par := *sp
-	code := fmt.Sprintf("%s",par[0])
+	industryCode := fmt.Sprintf("%s",par[0])
+	industryName := fmt.Sprintf("%s",par[1])
+	cDate := time.Now().Format(config.DayOut)
 	hd.individualStocks = []model.IndividualStock{}
+	hd.relatDusDivs = []model.RelatDusDiv{}
+	var individualStock model.IndividualStock
+	var relatDusDiv model.RelatDusDiv
+	relatDusDiv.IndustryCode = industryCode
+	relatDusDiv.IndustryName = industryName
+	relatDusDiv.CDate = cDate
 	doc.Find("tbody").Find("tr").Each(func(i int, s *goquery.Selection) {
-		var individualStock model.IndividualStock
 		//序号	代码	名称	现价 	涨跌幅(%) 	涨跌 	涨速(%) 	换手(%) 	量比 	振幅(%) 	成交额 	流通股 	流通市值 	市盈率 	加自选
 		individualStock.IndividualName,individualStock.IndividualCode = getCodeAndName(s,2)
 		if s.Children().Eq(3).Text() == "--" {
@@ -123,13 +131,44 @@ func (hd *HandleDataInfo) handleIndividualStockData(fundType FundType,doc *goque
 		if s.Children().Eq(13).Text() != "--" {
 			individualStock.Pe,_ = strconv.ParseFloat(s.Children().Eq(13).Text(),64)
 		}
-		//所属于版块code
-		individualStock.IndustryCode = code
-		individualStock.CDate = time.Now().Format(config.DayOut)
+		individualStock.CDate = cDate
 		hd.individualStocks = append(hd.individualStocks,individualStock)
+		relatDusDiv.IndividualCode = individualStock.IndividualCode
+		hd.relatDusDivs = append(hd.relatDusDivs, relatDusDiv)
 	})
 	if len(hd.individualStocks) > 0 {
 		err := global.Gdb.Save(&hd.individualStocks).Error
+		if err != nil {
+			global.Zlog.Warn(err.Error())
+		}
+	}
+	if len(hd.relatDusDivs) > 0 {
+		err := global.Gdb.Save(&hd.relatDusDivs).Error
+		if err != nil {
+			global.Zlog.Warn(err.Error())
+		}
+	}
+}
+
+//处理板块详细数据
+func (hd *HandleDataInfo) handlePlateData(doc *goquery.Document) {
+	hd.plateBankrolls = []model.PlateBankroll{}
+	doc.Find("tbody").Find("tr").Each(func(i int, s *goquery.Selection) {
+		var plateBankroll model.PlateBankroll
+		//序号	板块	 涨跌幅(%)	总成交量（万手）	总成交额（亿元）	净流入（亿元）	上涨家数	下跌家数	均价	领涨股	最新价	涨跌幅(%)
+		plateBankroll.PlateName,plateBankroll.PlateCode = getCodeAndName(s,1)
+		plateBankroll.RoseRatio = utils.PercentNumToFloat(s.Children().Eq(2).Text())
+		plateBankroll.ObVolume = utils.ConverMoney(s.Children().Eq(3).Text()+"万")
+		plateBankroll.ObPrice = utils.ConverMoney(s.Children().Eq(4).Text()+"亿")
+		plateBankroll.FundRealIn = utils.ConverMoney(s.Children().Eq(5).Text()+"亿")
+		plateBankroll.RiseCompanyNum, _ = strconv.Atoi(s.Children().Eq(6).Text())
+		plateBankroll.DropCompanyNum, _ = strconv.Atoi(s.Children().Eq(7).Text())
+		plateBankroll.AvgPrice, _ = strconv.ParseFloat(s.Children().Eq(8).Text(),64)
+		plateBankroll.CDate = time.Now().Format(config.DayOut)
+		hd.plateBankrolls = append(hd.plateBankrolls,plateBankroll)
+	})
+	if len(hd.plateBankrolls) > 0 {
+		err := global.Gdb.Save(&hd.plateBankrolls).Error
 		if err != nil {
 			global.Zlog.Warn(err.Error())
 		}

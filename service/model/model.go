@@ -5,6 +5,6 @@ import (
 )
 
 type GVA_MODEL struct {
-	CreatedAt time.Time      // 创建时间
-	UpdatedAt time.Time     // 更新时间
+	CreatedAt time.Time `json:"-"`     //创建时间
+	UpdatedAt time.Time `json:"-"`    // 更新时间
 }

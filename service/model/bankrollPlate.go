@@ -22,9 +22,22 @@ func (BankrollPlate) TableName() string {
 //-- 查询板块交易额
 func (bankroll *BankrollPlate) GetPlateBankroll(sdate,edate string,fundType int) ([]BankrollPlate,error) {
 	var boP = []BankrollPlate{}
-	r := global.Gdb.Raw("select ib.industry_code, date_format(ib.c_date,'%m-%d') as c_date, ib.industry_name, sum(fund_real_in) as fund_real_in, sum(ob_price) as ob_price, sum(circulate_value) as circulate_value, sum(ob_price) / sum(circulate_value) as contact_ratio, count(*) as count_num from industry_bankroll ib inner join individual_stock s on ib.industry_code = s.industry_code and ib.c_date = s.c_date where ib.c_date between ? and ? and fund_type = ? group by ib.industry_code order by contact_ratio desc",sdate,edate,fundType).Scan(&boP)
+	r := global.Gdb.Raw("",sdate,edate,fundType).Scan(&boP)
 	if r.Error != nil {
 		return nil,r.Error
 	}
 	return boP,r.Error
 }
+
+//-- 查询板块分类
+func (bankroll *BankrollPlate) GetPlateGroup() ([]RelatDusDiv,error) {
+	var boP = []RelatDusDiv{}
+	r := global.Gdb.Raw("select industry_name,group_concat(individual_code) as individual_code from relat_dus_div group by industry_code").Scan(&boP)
+	if r.Error != nil {
+		return nil,r.Error
+	}
+	return boP,r.Error
+}
+
+
+

@@ -14,8 +14,8 @@ type Response struct {
 func (m *Response) MarshalBinary() ([]byte, error) {
 	return json.Marshal(m)
 }
-func (m *Response) UnMarshalBinary(s string,i *interface{}) error {
-	return json.Unmarshal([]byte(s),i)
+func (m *Response) UnMarshalBinary(s string,v interface{}) error {
+	return json.Unmarshal([]byte(s),v)
 }
 const (
 	ERROR   = 7

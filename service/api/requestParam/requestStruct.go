@@ -7,4 +7,5 @@ type BankrollParam struct {
 	FundType int `json:"fundType"`
 	CompareNum int `json:"compareNum"`
 	PeriodNum  int `json:"periodNum"`
+	IndividualCode  string `json:"individual_code"`
 }

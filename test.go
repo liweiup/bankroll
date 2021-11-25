@@ -1,10 +1,5 @@
 package main
 
-import (
-	"bankroll/global"
-	"context"
-)
-
 func addDate()  {
 	dateArr := make([]string,0)
 	//元旦1月1日~1月3日无调休共3天
@@ -51,7 +46,4 @@ func addDate()  {
 	dateArr = append(dateArr, "2022-10-05")
 	dateArr = append(dateArr, "2022-10-06")
 	dateArr = append(dateArr, "2022-10-07")
-	for _, s := range dateArr {
-		global.Redigo.SAdd(context.Background(),"BK:HOLIDAY",s)
-	}
 }
