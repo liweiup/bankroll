@@ -10,7 +10,7 @@ func AvgRiseRatio(f1,f2,c float64) (float64,bool) {
 		f1 = 1
 	}
 	v,b := Div(f2,f1)
-	r := math.Pow(v, float64(1/c)) - 1
+	r := math.Pow(v, float64(1 / c)) - 1
 	return r,b
 }
 

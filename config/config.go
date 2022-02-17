@@ -20,4 +20,5 @@ const (
 	RedisKey = "BK:"
 	HolidaySet = RedisKey+"HOLIDAY"
 	CacheSet = RedisKey+"CACHE:"
+	StockReportCode = RedisKey+"REPORT:CODE"
 )

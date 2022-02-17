@@ -3,7 +3,7 @@ package utils
 import (
 	"bankroll/config"
 	"bankroll/global/redigo"
-	"log"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,7 +17,8 @@ func PercentNumToFloat(num string) float64{
 	num = strings.Replace(num,"%","",1)
 	floatNum, err := strconv.ParseFloat(num,64)
 	if err != nil {
-		log.Fatal(err.Error())
+		//global.Zlog.Info(err.Error())
+		return 0
 	}
 	return floatNum / 100
 }
@@ -95,7 +96,9 @@ func getDayFilterHoli(currentSDate,currentEDate time.Time) (sDateStr,EDateStr st
 	for i,cudate := range curlist {
 		//去除周六周天 节假日
 		fdate, _ := time.Parse(config.LayoutDate,cudate);
-		dEx, _ := redigo.Dtype.Set.SisMember(config.HolidaySet,time.Now().Format(config.LayoutDate)).Bool()
+		dEx, _ := redigo.Dtype.Set.SisMember(config.HolidaySet,cudate).Bool()
+		fmt.Println(dEx)
+		fmt.Println(cudate)
 		//周六推移两天，周天和节假日推一天
 		if fdate.Weekday() == time.Sunday || fdate.Weekday() == time.Saturday || dEx {
 			cdayNum ++

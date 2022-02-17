@@ -19,6 +19,7 @@ type HandleDataInfo struct {
 	individualStocks []model.IndividualStock
 	plateBankrolls []model.PlateBankroll
 	relatDusDivs []model.RelatDusDiv
+	stockReports []model.StockReport
 }
 
 //分发
@@ -39,6 +40,8 @@ func (hd *HandleDataInfo) HandleSwitch(fundType FundType,resBody string, sp ...i
 		hd.handleIndividualStockData(doc,&sp)
 	case Plate:
 		hd.handlePlateData(doc)
+	case Report:
+		hd.handleReportData(doc,&sp)
 	default:
 
 	}
@@ -175,10 +178,61 @@ func (hd *HandleDataInfo) handlePlateData(doc *goquery.Document) {
 	}
 }
 
+//处理报告详细数据
+func (hd *HandleDataInfo) handleReportData(doc *goquery.Document,sp *[]interface{}) {
+	par := *sp
+	industryCode := fmt.Sprintf("%s",par[0])
+	hd.stockReports = []model.StockReport{}
+	doc.Find("tbody").Find("tr").Each(func(i int, s *goquery.Selection) {
+		var stockReport model.StockReport
+		stockReport.IndividualCode = industryCode
+		//序号 报告期	公告日期	营业收入（元）同比增长（%）季度环比增长（%）净利润（元）同比增长（%）季度环比增长（%） 每股收益（元）每股净资产（元） 净资产收益率（%）每股经营现金流量（元）销售毛利率（%）
+		stockReport.ReportDate = s.Children().Eq(1).Text()
+		stockReport.AnnounceDate = s.Children().Eq(2).Text()
+		stockReport.EarnMoney = utils.ConverMoney(s.Children().Eq(3).Text())
+		stockReport.EmTbRise = utils.PercentNumToFloat(s.Children().Eq(4).Text() + "%")
+		stockReport.EmHbRise = utils.PercentNumToFloat(s.Children().Eq(5).Text() + "%")
+		stockReport.RetainProfit = utils.ConverMoney(s.Children().Eq(6).Text())
+		stockReport.RpTbRise = utils.PercentNumToFloat(s.Children().Eq(7).Text() + "%")
+		stockReport.RpHbRise = utils.PercentNumToFloat(s.Children().Eq(8).Text() + "%")
+		stockReport.EsProfit, _ = strconv.ParseFloat(s.Children().Eq(9).Text(),64)
+		stockReport.EsAssets, _ = strconv.ParseFloat(s.Children().Eq(10).Text(),64)
+		stockReport.AssetsRatio = utils.PercentNumToFloat(s.Children().Eq(11).Text() + "%")
+		stockReport.EsCash, _ = strconv.ParseFloat(s.Children().Eq(12).Text(),64)
+		stockReport.SellMoneyRate = utils.PercentNumToFloat(s.Children().Eq(13).Text() + "%")
+		stockReport.DateSort = getSortLetter(stockReport.ReportDate)
+		hd.stockReports = append(hd.stockReports,stockReport)
+	})
+	if len(hd.stockReports) > 0 {
+		err := global.Gdb.Save(&hd.stockReports).Error
+		if err != nil {
+			global.Zlog.Warn(err.Error())
+		}
+	}
+}
+
+
 func getCodeAndName(s *goquery.Selection,eq int) (string,string){
 	IndustryCodeUrl, _ := s.Children().Eq(eq).Find("a").Attr("href")
 	preg,_ := regexp.Compile("[0-9]{4,10}")
 	code := preg.FindString(IndustryCodeUrl)
 	name := s.Children().Eq(eq).Text()
 	return name,code
+}
+
+func getSortLetter(s string) string {
+	reportYear := string([]byte(s)[:4])
+	if strings.Contains(s,"年年") {
+		return reportYear+"D"
+	}
+	if strings.Contains(s,"三季") {
+		return reportYear+"C"
+	}
+	if strings.Contains(s,"年中") {
+		return reportYear+"B"
+	}
+	if strings.Contains(s,"一季") {
+		return reportYear+"A"
+	}
+	return ""
 }

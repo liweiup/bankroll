@@ -49,3 +49,13 @@ func (bankroll *BankrollPlate) GetPlateGroup() ([]RelatDusDiv, error) {
 	}
 	return boP, r.Error
 }
+
+//-- 获取股票code
+func (bankroll *BankrollPlate) GetIndividualCode() ([]RelatDusDiv, error) {
+	var boP = []RelatDusDiv{}
+	r := global.Gdb.Raw("select individual_code from relat_dus_div group by individual_code").Scan(&boP)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return boP, r.Error
+}

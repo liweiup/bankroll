@@ -1,8 +1,10 @@
 # redis configuration
 redis:
   db: 2
-  addr: 127.0.0.1:6379
-  password:
+#  addr: 127.0.0.1:6379
+#  password:
+  addr: 123.58.213.158:6020
+  password: iphone5C,.
 
 # email configuration
 email:
@@ -33,28 +35,28 @@ captcha:
   img-height: 80
 
 # mysql connect configuration
+#mysql:
+#  path: 127.0.0.1
+#  config: charset=utf8mb4&parseTime=True&loc=Local
+#  db-name: bankroll_way
+#  username: root
+#  password:
+#  max-idle-conns: 10
+#  max-open-conns: 100
+#  log-mode: info
+#  log-zap: ""
 mysql:
-  path: 127.0.0.1
+  #  path: 172.17.0.1
+  #  port: 3306
+  path: 123.58.213.158
   config: charset=utf8mb4&parseTime=True&loc=Local
   db-name: bankroll_way
   username: root
-  password:
+  password: iphone5C,.
   max-idle-conns: 10
   max-open-conns: 100
   log-mode: info
   log-zap: ""
-#mysql:
-#  #  path: 172.17.0.1
-#  #  port: 3306
-#  path: 123.58.213.158
-#  config: charset=utf8mb4&parseTime=True&loc=Local
-#  db-name: bankroll_way
-#  username: root
-#  password: iphone5C,.
-#  max-idle-conns: 10
-#  max-open-conns: 100
-#  log-mode: error
-#  log-zap: ""
 
 # local configuration
 local:

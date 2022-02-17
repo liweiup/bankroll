@@ -1,4 +1,5 @@
 package model
+
 //行业资金
 type IndustryBankroll struct {
 	GVA_MODEL

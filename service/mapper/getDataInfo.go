@@ -4,6 +4,7 @@ import (
 	"bankroll/service/api/requestParam"
 	"bankroll/service/model"
 	"bankroll/utils"
+	"strings"
 )
 
 type DataInfo struct {
@@ -147,6 +148,50 @@ func (bankroll *DataInfo) GetStockBankroll(backrollparam requestParam.BankrollPa
 			}
 			count++
 		}
+		//年报数据
+		reportList, _ := stockReport.GetIndividualReport(i1,"")
+		flag := false
+		for i := len(reportList) - 1; i >= 0 ; i-- {
+			nowReport := reportList[i]
+			//如果是第一季度需要跳过
+			hasA := strings.Contains(reportList[i].DateSort,"A")
+			if (!hasA || i == len(reportList) - 1) && !flag{
+				flag = true
+				continue
+			}
+			prevReport := reportList[i + 1]
+			if strings.Contains(nowReport.DateSort,"A") {
+				prevReport.RetainProfit = 0
+				prevReport.EarnMoney = 0
+			}
+			//净利润部分
+			realRetainProfit, _ := utils.Sub(nowReport.RetainProfit,prevReport.RetainProfit)
+			bankrollStock.RealRetainProfit = append(bankrollStock.RealRetainProfit,realRetainProfit)
+			if len(bankrollStock.RealRetainProfit) > 1 {
+				sumProfit := 0.00
+				for _, v3 := range bankrollStock.RealRetainProfit {
+					sumProfit, _ = utils.Add(v3,sumProfit)
+				}
+				//平均收入增长 = 本期收入 /（几个季度收入 / 几个季度 ） - 1
+				flagProfit, _ := utils.Div(sumProfit, float64(len(bankrollStock.RealRetainProfit)))
+				avgRise, _ := utils.Div(nowReport.RetainProfit,flagProfit)
+				avgRise, _ = utils.Sub(avgRise,1)
+				bankrollStock.AvgRetainRise = append(bankrollStock.AvgRetainRise,avgRise)
+			}
+
+			//rpTbRise, _ := utils.Sub(realRetainProfit,prevReport.RetainProfit)
+			//rpTbRise, _ := utils.Div(rpTbRise,prevReport.RetainProfit)
+			bankrollStock.RpTbRise = append(bankrollStock.RpTbRise,nowReport.RpTbRise)
+			bankrollStock.RpHbRise = append(bankrollStock.RpHbRise,nowReport.RpHbRise)
+			//营业收入部分
+			realEarnMoney, _ := utils.Sub(nowReport.EarnMoney,prevReport.EarnMoney)
+			bankrollStock.RealEarnMoney = append(bankrollStock.RealEarnMoney,realEarnMoney)
+			bankrollStock.EmTbRise = append(bankrollStock.EmTbRise,nowReport.EmTbRise)
+			bankrollStock.EmHbRise = append(bankrollStock.EmHbRise,nowReport.EmHbRise)
+
+			bankrollStock.DateSort = append(bankrollStock.DateSort,nowReport.DateSort)
+			bankrollStock.SellMoneyRate = append(bankrollStock.SellMoneyRate,nowReport.SellMoneyRate)
+		}
 		//名称
 		bankrollStock.IndividualCode = v2[0].IndividualCode
 		bankrollStock.IndividualName = v2[0].IndividualName
@@ -159,7 +204,18 @@ func (bankroll *DataInfo) GetStockBankroll(backrollparam requestParam.BankrollPa
 		bankrollStock.AvgObPrice, _ = utils.Div(avgObPrice, fCount)
 		bankrollStock.CirculateStock = v2[len(v2)-1].CirculateStock
 		bankrollStock.CirculateValue = v2[len(v2)-1].CirculateValue
-		bankrollStock.Pe = v2[len(v2)-1].Pe
+		//bankrollStock.Pe = v2[len(v2)-1].Pe
+		//计算ttm
+		if len(bankrollStock.RealRetainProfit) >= 4 {
+			ttmRealProfitArr := bankrollStock.RealRetainProfit[len(bankrollStock.RealRetainProfit) - 4:len(bankrollStock.RealRetainProfit)]
+			ttmRealProfit := 0.0
+			for _, f := range ttmRealProfitArr {
+				ttmRealProfit, _ = utils.Add(ttmRealProfit,f)
+			}
+			//每股利润
+			totalProfit, _ := utils.Div(ttmRealProfit,bankrollStock.CirculateStock)
+			bankrollStock.Pe, _ = utils.Div(bankrollStock.NowPrice[len(bankrollStock.NowPrice)-1],totalProfit)
+		}
 		cArr = append(cArr, bankrollStock)
 	}
 	return cArr, nil

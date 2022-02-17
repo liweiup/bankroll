@@ -3,6 +3,7 @@ package service
 import (
 	"bankroll/config"
 	"bankroll/global/redigo"
+	"bankroll/service/api"
 	"bankroll/utils"
 	"fmt"
 	"github.com/robertkrimen/otto"
@@ -19,6 +20,8 @@ const (
 	Industry FundType = "hyzjl" //行业
 	IndustryStock FundType = "ggzjld" //个股详细数据
 	Plate FundType = "plate" //板块
+	Report FundType = "report" //板块
+
 )
 var hd HandleDataInfo
  //获取 个股|行业|概念 资金数据
@@ -79,6 +82,41 @@ func MarketGetPlateBankroll(size int) {
 	hd.HandleSwitch(Plate,resBody);
 	if err != nil {
 		log.Println(err.Error())
+	}
+}
+
+//设置需要获取财报的股票code
+func SetReportCodeToRedis() {
+	relatDusDiv, _ := api.ModelPlate.GetIndividualCode()
+	var codeArr []interface{}
+	for _, v := range relatDusDiv {
+		codeArr = append(codeArr, v.IndividualCode)
+	}
+	redigo.Dtype.Set.SAdd(config.StockReportCode,codeArr)
+	//有效期30天
+	redigo.Dtype.Key.Expire(config.StockReportCode,86400 * 30)
+}
+
+//获取财报数据
+func MarketGetStockReport() {
+	for i := 0; i < 20; i++ {
+		code, err := redigo.Dtype.Set.SPop(config.StockReportCode).String()
+		code = "002739"
+		code = "603987"
+		if err != nil {
+			return
+		}
+		strResUrl := fmt.Sprintf("http://data.10jqka.com.cn/ajax/yjgg/op/code/code/%s/ajax/1/free/1/",code)
+		header := map[string]string{
+			"hexin-v" : getHexinV(),
+		}
+		log.Printf("财报数据临时hexin-v：%s  url: %s",header["hexin-v"],strResUrl)
+		resBody,err := utils.HttpGetRequest(strResUrl,nil,header)
+		hd.HandleSwitch(Report,resBody,code);
+		if err != nil {
+			log.Println(err.Error())
+		}
+		time.Sleep(time.Second * 2)
 	}
 }
 
