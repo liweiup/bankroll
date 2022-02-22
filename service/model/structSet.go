@@ -86,3 +86,24 @@ type RelatDusDiv struct {
 func (RelatDusDiv) TableName() string {
 	return "relat_dus_div"
 }
+
+
+// 非小号json结果
+type FxhCoinInfo struct {
+	Data []BiDealDetail `json:"data" `
+}
+// 币交易明细
+type BiDealDetail struct {
+	GVA_MODEL
+	BiCode string `gorm:"column:bi_code" db:"bi_code" json:"name" form:"bi_code"` //币code
+	BiName string `gorm:"column:bi_name" db:"bi_name" json:"fullname" form:"bi_name"` //币名称
+	PriceUsd float64 `gorm:"column:price_usd" db:"price_usd" json:"current_price_usd" form:"price_usd"` //价格
+	VolUsd float64 `gorm:"column:vol_usd" db:"vol_usd" json:"vol_usd" form:"vol_usd"` //24小时交易额
+	TurnoverRatio float64 `gorm:"column:turnover_ratio" db:"turnover_ratio" json:"turnoverrate" form:"turnover_ratio"` //换手率
+	RoseRatio float64 `gorm:"column:rose_ratio" db:"rose_ratio" json:"change_percent" form:"rose_ratio"` //涨跌幅
+	CDate string `gorm:"column:c_date" db:"c_date" json:"c_date" form:"c_date"`
+}
+
+func (BiDealDetail) TableName() string {
+	return "bi_deal_detail"
+}

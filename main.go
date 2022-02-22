@@ -3,11 +3,6 @@ package main
 import (
 	"bankroll/global"
 	"bankroll/initialize"
-	"fmt"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func main() {
@@ -21,7 +16,7 @@ func main() {
 		db, _ := global.Gdb.DB()
 		defer db.Close()
 	}
-	//initialize.RunWindowsServer()
+	initialize.RunWindowsServer()
 	//service.SetReportCodeToRedis()
 	//service.MarketGetStockReport()
 	//reportList, _ := api.StockReport.GetIndividualReport("002739","")
@@ -40,34 +35,4 @@ func main() {
 	//fmt.Println(utils.Sqrt(-0.239))
 	//fmt.Println(math.Sqrt(-0.239))
 	//fmt.Println("binarySearchRecursive target index: ", binarySearchRecursive(s,9, 0, len(s)))
-
-	//双色球
-	//篮球
-	blueBall := []int{1,2,3,4,5,6,7,8,9,10,11,12,14,14,15,16}
-	//红球
-	redBall := []int{1,2,3,4,5,6,7,8,9,10,11,12,14,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33}
-	//取6个红球
-	flagBall := []string{}
-	rand.Seed(time.Now().Unix())
-	for{
-		br := rand.Intn(32)  //随机数
-		forflag := false
-		for i2, _ := range flagBall {
-			if i2 == redBall[br] {
-				forflag = true
-			}
-		}
-		if forflag {
-			continue
-		}
-		fmt.Println(br)
-		if redBall[br] != 0 {
-			flagBall = append(flagBall, strconv.Itoa(redBall[br]))
-		}
-		if len(flagBall) == 6 {
-			break
-		}
-	}
-	rr := rand.Intn(15)
-	fmt.Println(strings.Join(flagBall," ") + " " + strconv.Itoa(blueBall[rr]))
 }
