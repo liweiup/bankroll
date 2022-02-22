@@ -15,7 +15,7 @@ CREATE TABLE `individual_bankroll` (
   `updated_at` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `icd_index` (`individual_code`,`c_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=154040 DEFAULT CHARSET=utf8mb4 COMMENT='个股资金流';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='个股资金流';
 
 CREATE TABLE `individual_stock` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -36,7 +36,7 @@ CREATE TABLE `individual_stock` (
   `updated_at` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `icd_index` (`individual_code`,`c_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=491586 DEFAULT CHARSET=utf8mb4 COMMENT='个股信息';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='个股信息';
 
 CREATE TABLE `industry_bankroll` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -55,7 +55,7 @@ CREATE TABLE `industry_bankroll` (
   `updated_at` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `icd_index` (`industry_code`,`c_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=7719 DEFAULT CHARSET=utf8mb4 COMMENT='行业资金';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='行业资金';
 
 -- 序号	板块	涨跌幅(%)	总成交量（万手）	总成交额（亿元）	净流入（亿元）	上涨家数	下跌家数	均价	领涨股	最新价	涨跌幅(%)
 CREATE TABLE `plate_bankroll` (
@@ -74,7 +74,7 @@ CREATE TABLE `plate_bankroll` (
   `updated_at` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `icd_index` (`industry_code`,`c_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=7719 DEFAULT CHARSET=utf8mb4 COMMENT='板块资金';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='板块资金';
 
 
 CREATE TABLE `relat_industry_individual` (
@@ -86,8 +86,23 @@ CREATE TABLE `relat_industry_individual` (
   `updated_at` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   PRIMARY KEY (`id`),
   UNIQUE KEY `icd_index` (`industry_code`,`individual_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=7719 DEFAULT CHARSET=utf8mb4 COMMENT='行业和个股关联表';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='行业和个股关联表';
 
 
 
-
+create table bi_deal_detail
+(
+    deal_detail_id              int auto_increment comment '主键' primary key,
+    bi_code varchar(10)   default ''                     not null comment '币code',
+    bi_name varchar(20)   default ''                    not null comment '币名称',
+    price_usd      float(10, 4)  default 0.0000      not null comment '价格',
+    vol_usd       double(20, 2) default 0.00         not null comment '24小时交易额',
+    turnover_ratio  float(10, 4)  default 0.0000   not null comment '换手率',
+    rose_ratio      float(10, 4)  default 0.0000     not null comment '涨跌幅',
+    c_date          date          default '1970-01-01'          not null,
+    created_at      datetime      default '1970-01-01 00:00:00' not null,
+    updated_at      datetime      default '1970-01-01 00:00:00' not null,
+    constraint icd_index
+        unique (deal_detail_id, c_date)
+)
+    comment '币交易明细' charset = utf8mb4;
