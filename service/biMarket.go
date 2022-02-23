@@ -10,11 +10,6 @@ import (
 	"log"
 	"time"
 )
-
-const (
-
-)
-
 /**
 非小号行情
  */
