@@ -10,7 +10,6 @@ import (
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"log"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -143,32 +142,60 @@ func WenSearchBiddingData(plateQues,stockQues string) {
 	sdate := strings.Replace(time.Now().Format(config.DayOut),"-","",-1)
 	log.Println("问题："+stockQues)
 	stockMapArr := []map[string]string{}
+	emailText := ""
 	for _, v := range stockResSearchDatas.MustArray() {
 		stockMap := map[string]string{}
 		vmap := v.(map[string]interface{})
-		stockMap["a股票简称"] = vmap["股票简称"].(string)
-		stockMap["b所属同花顺行业"] = vmap["所属同花顺行业"].(string)
-		stockMap["c所属概念"] = vmap["所属概念"].(string)
-		stockMap["d涨跌幅:前复权"] = vmap["涨跌幅:前复权[" + sdate + "]"].(string)
-		stockMap["e量比"] = vmap["量比[" + sdate + "]"].(string)
-		//stockMap["f委比"] = vmap["委比[" + sdate + "]"].(string)
-		stockMap["gmacd(dea值)"] = vmap["macd(dea值)[" + sdate + "]"].(string)
-		stockMap["h上市天数"] = string(vmap["上市天数["+sdate+"]"].(json.Number))
-		stockMap["i市盈率(pe)"] = vmap["市盈率(pe)[" + sdate + "]"].(string)
-		stockMap["j股市值(不含限售股)"] = vmap["a股市值(不含限售股)[" + sdate + "]"].(string)
+		stockMap["a-股票简称"] = vmap["股票简称"].(string) + "\n"
+		stockMap["b-所属同花顺行业"] = vmap["所属同花顺行业"].(string) + "\n"
+		stockMap["c-所属概念"] = vmap["所属概念"].(string) + "\n"
+		stockMap["d-涨跌幅:前复权"] = vmap["涨跌幅:前复权[" + sdate + "]"].(string) + "\n"
+		stockMap["e-量比"] = vmap["量比[" + sdate + "]"].(string) + "\n"
+		wbyz := 0.00
+		if  vmap["委比[" + sdate + "]"] != nil {
+			stockMap["f-委比"] = vmap["委比[" + sdate + "]"].(string) + "\n"
+			wbyz,_ = strconv.ParseFloat(vmap["委比[" + sdate + "]"].(string),64)
+		}
+		stockMap["g-macd(dea值)"] = vmap["macd(dea值)[" + sdate + "]"].(string) + "\n"
+		stockMap["h-上市天数"] = string(vmap["上市天数["+sdate+"]"].(json.Number)) + "\n"
+		stockMap["i-市盈率(pe)"] = vmap["市盈率(pe)[" + sdate + "]"].(string) + "\n"
+		scNum, _ := strconv.ParseFloat(vmap["a股市值(不含限售股)[" + sdate + "]"].(string),64)
+		stockMap["j-股市值(不含限售股)"] = utils.ConvertNumToCap(scNum)  + "\n"
+		zfyz,_ := strconv.ParseFloat(vmap["涨跌幅:前复权[" + sdate + "]"].(string),64)
+		stockMap["k-涨幅因子"] = fmt.Sprintf("%.4f",(zfyz + 6) / 4) + "\n"
+		stockMap["l-委比因子"] = fmt.Sprintf("%.4f",wbyz / 25)
+
+		emailText += "a-股票简称: " + stockMap["a-股票简称"]
+		emailText += "b-所属同花顺行业: " + stockMap["b-所属同花顺行业"]
+		emailText += "c-所属概念: " + stockMap["c-所属概念"]
+		emailText += "d-涨跌幅:前复权: " + stockMap["b-涨跌幅:前复权"]
+		emailText += "e-量比: " + stockMap["e-量比"]
+		if  vmap["委比[" + sdate + "]"] != nil {
+			emailText += "f-委比: " + stockMap["f-委比"]
+		}
+		emailText += "g-macd(dea值): " + stockMap["g-macd(dea值)"]
+		emailText += "h-上市天数: " + stockMap["h-上市天数"]
+		emailText += "i-市盈率(pe): " + stockMap["i-市盈率(pe)"]
+		emailText += "j-股市值(不含限售股): " + stockMap["j-股市值(不含限售股)"]
+		emailText += "k-涨幅因子: " + stockMap["k-涨幅因子"]
+		emailText += "l-委比因子: " + stockMap["l-委比因子"]
+		emailText += "\n\n"
 		stockMapArr = append(stockMapArr, stockMap)
-		volPercent, _ := strconv.ParseFloat(stockMap["e量比"],64)
+		//volPercent, _ := strconv.ParseFloat(stockMap["e量比"],64)
 		//总分100分，量比和委比分别50分
 		//假设第一名量比为10,得分为50
 		//剩余得分为
-		fmt.Println(stockMap)
-		fmt.Println("\n")
-		fmt.Println(fmt.Sprintf("%.4f", volPercent))
-		fmt.Println(50 * math.Log(volPercent))
-		fmt.Println(50 * math.Log(10))
+		//fmt.Println("\n")
+		//fmt.Println(fmt.Sprintf("%.4f", volPercent))
+		//fmt.Println(50 * math.Log(volPercent))
+		//fmt.Println(50 * math.Log(10))
 		//50 * math.Round(volPercent)
 	}
-
+	if len(stockMapArr) < 1 {
+		emailText = "没有结果。"
+	}
+	log.Println(emailText)
+	utils.SendEmail("集合竞价筛股",emailText)
 }
 
 
