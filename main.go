@@ -3,6 +3,7 @@ package main
 import (
 	"bankroll/global"
 	"bankroll/initialize"
+	"bankroll/service"
 )
 
 func main() {
@@ -10,13 +11,14 @@ func main() {
 	global.Gdb = initialize.Gorm() // gorm连接数据库
 	global.Zlog = initialize.Zap()
 	initialize.Redis()
-	initialize.Timer()
+	//initialize.Timer()
 	if global.Gdb != nil {
 		// 程序结束前关闭数据库链接
 		db, _ := global.Gdb.DB()
 		defer db.Close()
 	}
-	initialize.RunWindowsServer()
+	service.WenSearchBiddingData("上个交易日板块热度前4,非同花顺特色指数,非同花顺地域概念,上个交易日涨停家数>8","涨跌幅>0%且涨跌幅<30%,量比>2,上市天数>365,a股流通市值<300亿元,非st,macd0轴上且macd>0,近一年涨幅小于50%,近10个交易日涨幅大于10%小于40%,同花顺行业,行业属于")
+	//initialize.RunWindowsServer()
 	//service.SetReportCodeToRedis()
 	//service.MarketGetStockReport()
 	//reportList, _ := api.StockReport.GetIndividualReport("002739","")

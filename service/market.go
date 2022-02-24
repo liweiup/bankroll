@@ -5,11 +5,15 @@ import (
 	"bankroll/global/redigo"
 	"bankroll/service/api"
 	"bankroll/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 type FundType string
@@ -22,6 +26,9 @@ const (
 	Plate FundType = "plate" //板块
 	Report FundType = "report" //板块
 
+	//问财
+	WenCaiZhiShu FundType = "zhishu" //板块指数
+	WenCaiStock FundType = "stock" //股票
 )
 var hd HandleDataInfo
  //获取 个股|行业|概念 资金数据
@@ -101,8 +108,6 @@ func SetReportCodeToRedis() {
 func MarketGetStockReport() {
 	for i := 0; i < 20; i++ {
 		code, err := redigo.Dtype.Set.SPop(config.StockReportCode).String()
-		code = "002739"
-		code = "603987"
 		if err != nil {
 			return
 		}
@@ -119,6 +124,53 @@ func MarketGetStockReport() {
 		time.Sleep(time.Second * 2)
 	}
 }
+
+func WenSearchBiddingData(plateQues,stockQues string) {
+	res, err := WenCaiSearch(plateQues,WenCaiZhiShu)
+	if err != nil {
+		return 
+	}
+	searchDatas := res.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
+	plateArr := []string{}
+	for _, v := range searchDatas.MustArray() {
+		plateArr = append(plateArr, v.(map[string]interface{})["指数简称"].(string))
+	}
+	plateStrSearch := strings.Join(plateArr,"或")
+	//查询股票的条件
+	stockQues += plateStrSearch
+	stockRes, err := WenCaiSearch(stockQues,WenCaiStock)
+	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
+	sdate := strings.Replace(time.Now().Format(config.DayOut),"-","",-1)
+	log.Println("问题："+stockQues)
+	stockMapArr := []map[string]string{}
+	for _, v := range stockResSearchDatas.MustArray() {
+		stockMap := map[string]string{}
+		vmap := v.(map[string]interface{})
+		stockMap["a股票简称"] = vmap["股票简称"].(string)
+		stockMap["b所属同花顺行业"] = vmap["所属同花顺行业"].(string)
+		stockMap["c所属概念"] = vmap["所属概念"].(string)
+		stockMap["d涨跌幅:前复权"] = vmap["涨跌幅:前复权[" + sdate + "]"].(string)
+		stockMap["e量比"] = vmap["量比[" + sdate + "]"].(string)
+		//stockMap["f委比"] = vmap["委比[" + sdate + "]"].(string)
+		stockMap["gmacd(dea值)"] = vmap["macd(dea值)[" + sdate + "]"].(string)
+		stockMap["h上市天数"] = string(vmap["上市天数["+sdate+"]"].(json.Number))
+		stockMap["i市盈率(pe)"] = vmap["市盈率(pe)[" + sdate + "]"].(string)
+		stockMap["j股市值(不含限售股)"] = vmap["a股市值(不含限售股)[" + sdate + "]"].(string)
+		stockMapArr = append(stockMapArr, stockMap)
+		volPercent, _ := strconv.ParseFloat(stockMap["e量比"],64)
+		//总分100分，量比和委比分别50分
+		//假设第一名量比为10,得分为50
+		//剩余得分为
+		fmt.Println(stockMap)
+		fmt.Println("\n")
+		fmt.Println(fmt.Sprintf("%.4f", volPercent))
+		fmt.Println(50 * math.Log(volPercent))
+		fmt.Println(50 * math.Log(10))
+		//50 * math.Round(volPercent)
+	}
+
+}
+
 
 func getHexinV() string{
 	jsFile := "./js/aes.min.js"

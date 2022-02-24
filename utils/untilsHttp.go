@@ -57,35 +57,34 @@ func HttpGetRequest(strUrl string, mapParams,headerParams map[string]string) (st
 	}
 	return resBody,nil
 }
-func HttpPostRequestBatchorder(strUrl string, mapParams map[string]interface{}) string {
+func HttpPostRequestBatchorder(strUrl string, mapParams map[string]string,headerParams map[string]string) (string,error) {
 	httpClient := &http.Client{}
-
 	jsonParams := ""
 	if nil != mapParams {
 		bytesParams, _ := json.Marshal(mapParams)
 		jsonParams = string(bytesParams)
 	}
-
 	request, err := http.NewRequest("POST", strUrl, strings.NewReader(jsonParams))
 	if nil != err {
-		return err.Error()
+		return "",err
 	}
-	//request.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36")
+	request.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36")
 	request.Header.Add("Content-Type", "application/json")
-	//request.Header.Add("Accept-Language", "zh-cn")
-
+	request.Header.Add("Accept-Language", "zh-cn")
+	for k,v := range headerParams {
+		request.Header.Add(k, v)
+	}
 	response, err := httpClient.Do(request)
 	defer response.Body.Close()
 	if nil != err {
-		return err.Error()
+		return "",err
 	}
-
 	body, err := ioutil.ReadAll(response.Body)
 	if nil != err {
-		return err.Error()
+		return "",err
 	}
-
-	return string(body)
+	resBody := string(body)
+	return resBody,nil
 }
 
 

@@ -7,6 +7,8 @@ import (
 	"bankroll/utils"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/bitly/go-simplejson"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -235,4 +237,38 @@ func getSortLetter(s string) string {
 		return reportYear+"A"
 	}
 	return ""
+}
+
+//问财参数
+var WenCaiParam =  map[string]string{
+	"perpage": "50",
+	"page": "1",
+	"log_info": "{\"input_type\":\"typewrite\"}",
+	"source": "Ths_iwencai_Xuangu",
+	"version": "2.0",
+	"query_area": "",
+	"block_list": "",
+	"add_info": "{\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}",
+}
+
+//问财股票检索
+func WenCaiSearch(question string,fundtype FundType) (*simplejson.Json,error) {
+	url := "https://www.iwencai.com/customized/chart/get-robot-data"
+	header := map[string]string{
+		"hexin-v" : getHexinV(),
+	}
+	WenCaiParam["question"] = question
+	WenCaiParam["secondary_intent"] = string(fundtype)
+	resBody,err := utils.HttpPostRequestBatchorder(url,WenCaiParam,header)
+	if err != nil {
+		log.Println(err.Error())
+		return nil,err
+	}
+	res, err := simplejson.NewJson([]byte(resBody))
+	if err != nil {
+		log.Println(err.Error())
+		return nil,err
+	}
+	return res,nil
+
 }

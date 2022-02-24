@@ -3,20 +3,21 @@ module bankroll
 go 1.16
 
 require (
-	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/PuerkitoBio/goquery v1.7.1
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
+	github.com/bitly/go-simplejson v0.5.0
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/garyburd/redigo v1.6.3
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/nanmu42/gzip v1.2.0 // indirect
+	github.com/nanmu42/gzip v1.2.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/shopspring/decimal v1.3.1 // indirect
+	github.com/shopspring/decimal v1.3.1
 	github.com/songzhibin97/gkit v1.1.2
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.7.0
