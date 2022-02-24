@@ -124,6 +124,8 @@ func MarketGetStockReport() {
 	}
 }
 
+var emailFlagArr = []string{}
+
 func WenSearchBiddingData(plateQues,stockQues string) {
 	res, err := WenCaiSearch(plateQues,WenCaiZhiShu)
 	if err != nil {
@@ -144,6 +146,7 @@ func WenSearchBiddingData(plateQues,stockQues string) {
 	stockMapArr := []map[string]string{}
 	emailText := ""
 	for _, v := range stockResSearchDatas.MustArray() {
+
 		stockMap := map[string]string{}
 		vmap := v.(map[string]interface{})
 		stockMap["a-股票简称"] = vmap["股票简称"].(string) + "\n"
@@ -164,7 +167,17 @@ func WenSearchBiddingData(plateQues,stockQues string) {
 		zfyz,_ := strconv.ParseFloat(vmap["涨跌幅:前复权[" + sdate + "]"].(string),64)
 		stockMap["k-涨幅因子"] = fmt.Sprintf("%.4f",(zfyz + 6) / 4) + "\n"
 		stockMap["l-委比因子"] = fmt.Sprintf("%.4f",wbyz / 25)
-
+		//确保同只股票邮件只发一次
+		flagNum := 0
+		for _, e := range emailFlagArr {
+			if e == vmap["股票简称"].(string) {
+				flagNum = 1
+			}
+		}
+		if flagNum == 1 {
+			continue;
+		}
+		emailFlagArr = append(emailFlagArr, vmap["股票简称"].(string))
 		emailText += "a-股票简称: " + stockMap["a-股票简称"]
 		emailText += "b-所属同花顺行业: " + stockMap["b-所属同花顺行业"]
 		emailText += "c-所属概念: " + stockMap["c-所属概念"]
@@ -181,6 +194,7 @@ func WenSearchBiddingData(plateQues,stockQues string) {
 		emailText += "l-委比因子: " + stockMap["l-委比因子"]
 		emailText += "\n\n"
 		stockMapArr = append(stockMapArr, stockMap)
+
 		//volPercent, _ := strconv.ParseFloat(stockMap["e量比"],64)
 		//总分100分，量比和委比分别50分
 		//假设第一名量比为10,得分为50
@@ -191,11 +205,10 @@ func WenSearchBiddingData(plateQues,stockQues string) {
 		//fmt.Println(50 * math.Log(10))
 		//50 * math.Round(volPercent)
 	}
-	if len(stockMapArr) < 1 {
-		emailText = "没有结果。"
-	}
 	log.Println(emailText)
-	utils.SendEmail("集合竞价筛股",emailText)
+	if emailText != "" {
+		utils.SendEmail("集合竞价筛股",emailText)
+	}
 }
 
 

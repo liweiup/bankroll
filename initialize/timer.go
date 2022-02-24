@@ -4,6 +4,7 @@ import (
 	"bankroll/global"
 	"bankroll/service"
 	"fmt"
+	"time"
 )
 
 func Timer() {
@@ -31,8 +32,11 @@ func Timer() {
 	})
 	global.Zlog.Warn(fmt.Sprintf("非小号虚拟币的交易情况：%d ", id))
 
-	id, _ = global.Timer.AddTaskByFunc("test5", "24-28 9 * * 1-5", func() {
-		service.WenSearchBiddingData("上个交易日板块热度前4,非同花顺特色指数,非同花顺地域概念,上个交易日涨停家数>8","涨跌幅>0%且涨跌幅<30%,量比>2,委比>50,上市天数>365,a股流通市值<300亿元,非st,macd0轴上且macd>0,近一年涨幅小于50%,近10个交易日涨幅大于10%小于40%,同花顺行业,行业属于")
+	id, _ = global.Timer.AddTaskByFunc("test5", "25-29 9 * * 1-5", func() {
+		for i := 0; i < 18; i++ {
+			service.WenSearchBiddingData("上个交易日板块热度前4,非同花顺特色指数,非同花顺地域概念,上个交易日涨停家数>8","涨跌幅>0%且涨跌幅<30%,量比>2,委比>50,上市天数>365,a股流通市值<300亿元,非st,macd0轴上且macd>0,近一年涨幅小于50%,近10个交易日涨幅大于10%小于40%,同花顺行业,行业属于")
+			time.Sleep(time.Second * 5)
+		}
 	})
 	//service.MarketGetBankRoll(service.Conception,"je",1,300)
 	//service.MarketGetBankRoll(service.Individual,"money",1,5000)
