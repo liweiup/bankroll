@@ -1,8 +1,10 @@
 package initialize
 
 import (
+	"bankroll/config"
 	"bankroll/global"
 	"bankroll/service"
+	"bankroll/utils"
 	"fmt"
 	"time"
 )
@@ -40,15 +42,13 @@ func Timer() {
 	})
 	//service.MarketGetBankRoll(service.Conception,"je",1,300)
 	//service.MarketGetBankRoll(service.Individual,"money",1,5000)
-
-	//if global.Config.Timer.Start {
-	//	for i := range global.Config.Timer.Detail {
-	//		go func(detail config.Detail) {
-	//			fmt.Println(detail.CompareField)
-	//			global.Timer.AddTaskByFunc("test", "1s", func() {
-	//				fmt.Println(time.Time{}.Date())
-	//			})
-	//		}(global.Config.Timer.Detail[i])
-	//	}
-	//}
+	if global.Config.Timer.Start {
+		for i := range global.Config.Timer.Detail {
+			go func(detail config.Detail) {
+				global.Timer.AddTaskByFunc("test", "20 1 1 * *", func() {
+					utils.ClearTable(global.Gdb,detail.TableName,detail.CompareField,detail.Interval)
+				})
+			}(global.Config.Timer.Detail[i])
+		}
+	}
 }
