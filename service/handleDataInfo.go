@@ -259,6 +259,8 @@ func WenCaiSearch(question string,fundtype FundType) (*simplejson.Json,error) {
 	}
 	WenCaiParam["question"] = question
 	WenCaiParam["secondary_intent"] = string(fundtype)
+	//pjson, _ := json.Marshal(WenCaiParam)
+	//global.Zlog.Info(string(pjson))
 	resBody,err := utils.HttpPostRequestBatchorder(url,WenCaiParam,header)
 	if err != nil {
 		log.Println(err.Error())
