@@ -5,10 +5,10 @@ import (
 	"bankroll/global"
 	"bankroll/service/model"
 	"bankroll/utils"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bitly/go-simplejson"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -239,9 +239,13 @@ func getSortLetter(s string) string {
 	return ""
 }
 
+type WenCai struct {
+	Question string
+	fundtype FundType
+}
 //问财参数
 var WenCaiParam =  map[string]string{
-	"perpage": "50",
+	"perpage": "100",
 	"page": "1",
 	"log_info": "{\"input_type\":\"typewrite\"}",
 	"source": "Ths_iwencai_Xuangu",
@@ -252,23 +256,22 @@ var WenCaiParam =  map[string]string{
 }
 
 //问财股票检索
-func WenCaiSearch(question string,fundtype FundType) (*simplejson.Json,error) {
+func (wc WenCai) WenCaiSearch() (*simplejson.Json,error) {
 	url := "https://www.iwencai.com/customized/chart/get-robot-data"
 	header := map[string]string{
 		"hexin-v" : getHexinV(),
 	}
-	WenCaiParam["question"] = question
-	WenCaiParam["secondary_intent"] = string(fundtype)
-	//pjson, _ := json.Marshal(WenCaiParam)
-	//global.Zlog.Info(string(pjson))
+	WenCaiParam["question"] = wc.Question
+	WenCaiParam["secondary_intent"] = string(wc.fundtype)
+	global.Zlog.Info("v值：" +getHexinV())
+	pjson, _ := json.Marshal(WenCaiParam)
+	global.Zlog.Info("请求参数值："+string(pjson))
 	resBody,err := utils.HttpPostRequestBatchorder(url,WenCaiParam,header)
 	if err != nil {
-		log.Println(err.Error())
 		return nil,err
 	}
 	res, err := simplejson.NewJson([]byte(resBody))
 	if err != nil {
-		log.Println(err.Error())
 		return nil,err
 	}
 	return res,nil

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/robertkrimen/otto"
+	"github.com/wxnacy/wgo/arrays"
 	"io/ioutil"
 	"log"
 	"os"
@@ -31,6 +32,9 @@ const (
 	WenCaiZhiShu FundType = "zhishu" //板块指数
 	WenCaiStock  FundType = "stock"  //股票
 )
+
+
+
 
 var hd HandleDataInfo
 
@@ -131,28 +135,49 @@ func MarketGetStockReport() {
 }
 
 var emailFlagArr = []string{}
-
+var plateCacheKey = "PLATE:CACHE"
 func WenSearchBiddingData(plateQues, stockQues string) {
-	res, err := WenCaiSearch(plateQues, WenCaiZhiShu)
-	if err != nil {
-		return
+	wc := WenCai{plateQues,WenCaiZhiShu}
+	emailText,plateStrSearch := "",""
+	//获取缓存里的题材
+	plateCacheStr, _ := redigo.Dtype.String.Get(plateCacheKey).String()
+	if plateCacheStr != "" {
+		plateStrSearch = plateCacheStr
+	} else {
+		res, err := wc.WenCaiSearch()
+		if err != nil {
+			global.Zlog.Info("请求出错：" +err.Error())
+			return
+		}
+		searchDatas := res.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
+		plateArr := []string{}
+		delPlateArr := []string{"壳资源","新股与次新股","ST板块","融资融券","核准制次新股","创投","摘帽"}
+		for _, v := range searchDatas.MustArray() {
+			zsName := v.(map[string]interface{})["指数简称"].(string)
+			if arrays.ContainsString(delPlateArr,zsName) != -1 {
+				continue
+			}
+			plateArr = append(plateArr, zsName)
+		}
+		if len(plateArr) < 1 {
+			utils.SendEmail("集合竞价筛股", "问题："+plateQues+"\n 结果：没有板块结果")
+			return
+		} else {
+			plateStrSearch = strings.Join(plateArr, "或")
+			redigo.Dtype.String.Set(plateCacheKey,plateStrSearch,5 * 60)
+		}
 	}
-	searchDatas := res.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
-	plateArr := []string{}
-	for _, v := range searchDatas.MustArray() {
-		plateArr = append(plateArr, v.(map[string]interface{})["指数简称"].(string))
-	}
-	if len(plateArr) < 1 {
-		utils.SendEmail("集合竞价筛股", "问题："+plateQues+"\n 结果：没有板块结果")
-		return
-	}
-	emailText := ""
-	plateStrSearch := strings.Join(plateArr, "或")
 	//查询股票的条件
 	if plateStrSearch != "" {
 		stockQues += "行业属于"+plateStrSearch
 	}
-	stockRes, err := WenCaiSearch(stockQues, WenCaiStock)
+	wc.Question = stockQues
+	wc.fundtype = WenCaiStock
+	stockRes, err := wc.WenCaiSearch()
+	if err != nil {
+		global.Zlog.Info("请求出错：" +err.Error())
+		return
+	}
 	rJson,_ := json.Marshal(stockRes)
 	global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
@@ -257,8 +282,24 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		log.Println(emailText)
 		utils.SendEmail("集合竞价筛股", emailText)
 	} else {
-		utils.SendEmail("集合竞价筛股", "返回结果不正确")
+		utils.SendEmail("集合竞价筛股", "没有结果")
 	}
+}
+
+//龙虎榜数据获取
+func WenSearchLongHuData(stockQues string) {
+	wc := WenCai{stockQues,WenCaiStock}
+	stockRes, err := wc.WenCaiSearch()
+	if err != nil {
+		global.Zlog.Info("请求出错：" +err.Error())
+		return
+	}
+	rJson,_ := json.Marshal(stockRes)
+	global.Zlog.Info("返回结果：" +string(rJson))
+	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
+	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
+	fmt.Println(stockResSearchDatas)
+	fmt.Println(sdate)
 }
 
 func getHexinV() string {
