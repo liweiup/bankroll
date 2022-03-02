@@ -64,9 +64,13 @@ Timer:
     # compareField: 需要比较时间的字段
     # interval: 时间间隔, 具体配置详看 time.ParseDuration() 中字符串表示 且不能为负数
     # 2160h = 24 * 30 * 3 -> 三个月
-#    { tableName: "sys_operation_records" , compareField: "created_at", interval: "2160h" },
-#    { tableName: "jwt_blacklists" , compareField: "created_at", interval: "168h" }
-    #{ tableName: "log2" , compareField: "created_at", interval: "2160h" }
+    { tableName: "individual_bankroll" , compareField: "created_at", interval: "1440h" },
+    { tableName: "individual_stock" , compareField: "created_at", interval: "1440h" },
+    { tableName: "industry_bankroll" , compareField: "created_at", interval: "1440h" },
+    { tableName: "plate_bankroll" , compareField: "created_at", interval: "1440h" },
+    { tableName: "relat_dus_div" , compareField: "created_at", interval: "1440h" },
+    { tableName: "stock_report" , compareField: "created_at", interval: "1440h" },
+    { tableName: "bi_deal_detail" , compareField: "created_at", interval: "1440h" },
   ]
 
 zap:

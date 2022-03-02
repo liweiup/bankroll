@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bitly/go-simplejson"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -275,5 +276,47 @@ func (wc WenCai) WenCaiSearch() (*simplejson.Json,error) {
 		return nil,err
 	}
 	return res,nil
+}
 
+func (wc WenCai) handleWcData(sjson *simplejson.Json,t time.Duration,input interface{},fieldNameArr map[string]string) (v [][]byte, err error) {
+	rv := reflect.ValueOf(input).Elem()
+	rt := reflect.TypeOf(input).Elem()
+	cDate := time.Now().Add(-time.Hour * t).Format(config.DayOut)
+	fmt.Println(cDate)
+	var value [][]byte
+	for _, v := range sjson.MustArray() {
+		vmap := v.(map[string]interface{})
+		for key, vv := range vmap {
+			for i := 0; i < rt.NumField(); i++ {
+				for sk, sv := range fieldNameArr {
+					if rt.Field(i).Name == sk && strings.Contains(key,sv) {
+						switch rv.Field(i).Kind() {
+						case reflect.String:
+							rv.Field(i).SetString(vv.(string))
+							break
+						case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int, reflect.Float64, reflect.Float32:
+							newNum := 0.0
+							if  reflect.TypeOf(vv).String() == "json.Number" {
+								newNum, _ = vv.(json.Number).Float64()
+							}
+							if  reflect.TypeOf(vv).String() == "string" {
+								newNum, _ = strconv.ParseFloat(vv.(string), 64)
+							}
+							rv.Field(i).SetFloat(newNum)
+							break
+						}
+						break
+					}
+				}
+				if rt.Field(i).Name == "CDate" {
+					rv.Field(i).SetString(cDate)
+				}
+			}
+		}
+		rvByte,_ := json.Marshal(rv.Interface())
+		value = append(value, rvByte)
+	}
+	//px := rv.Addr().Interface().(*model.ThxLonghuStock) // px := &x
+	//global.Gdb.Create(px)
+	return value, nil
 }

@@ -57,6 +57,8 @@ func (IndividualStock) TableName() string {
 	return "individual_stock"
 }
 
+
+
 //板块资金
 type PlateBankroll struct {
 	GVA_MODEL
@@ -87,6 +89,23 @@ func (RelatDusDiv) TableName() string {
 	return "relat_dus_div"
 }
 
+// ThxLonghuStock  龙湖榜个股信息
+type ThxLonghuStock struct {
+	GVA_MODEL
+	IndividualCode string    `gorm:"column:individual_code" json:"individual_code"` //  股票编号
+	IndividualName string    `gorm:"column:individual_name" json:"individual_name"` //  股票名称
+	UpPname        string    `gorm:"column:up_pname" json:"up_pname"`               //  上市板块
+	UpReason       string    `gorm:"column:up_reason" json:"up_reason"`             //  上榜原因
+	NowPrice       float64   `gorm:"column:now_price" json:"now_price"`             //  最新价
+	RoseRatio      float64   `gorm:"column:rose_ratio" json:"rose_ratio"`           //  最新涨跌幅
+	BuyValue       float64   `gorm:"column:buy_value" json:"buy_value"`             //  营业部买入金额合计（元）
+	SellValue      float64   `gorm:"column:sell_value" json:"sell_value"`           //  营业部卖出金额合计（元）
+	RealValue      float64   `gorm:"column:real_value" json:"real_value"`           //  营业部净额合计（元）
+	CDate          string `gorm:"column:c_date" json:"c_date"`
+}
+func (ThxLonghuStock) TableName() string {
+	return "thx_longhu_stock"
+}
 
 // 非小号json结果
 type FxhCoinInfo struct {

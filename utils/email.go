@@ -20,7 +20,7 @@ func SendEmail(subject,content string,) {
 	//设置服务器相关的配置
 	err := em.Send("smtp.qq.com:25", smtp.PlainAuth("", global.Config.Email.From, global.Config.Email.Secret, "smtp.qq.com"))
 	if err != nil {
-		log.Fatal(err)
+		log.Println("send error ... " + err.Error())
 	}
 	log.Println("send successfully ... ")
 }

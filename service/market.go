@@ -5,6 +5,7 @@ import (
 	"bankroll/global"
 	"bankroll/global/redigo"
 	"bankroll/service/api"
+	"bankroll/service/model"
 	"bankroll/utils"
 	"encoding/json"
 	"fmt"
@@ -282,7 +283,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		log.Println(emailText)
 		utils.SendEmail("集合竞价筛股", emailText)
 	} else {
-		utils.SendEmail("集合竞价筛股", "没有结果")
+		log.Println("集合竞价筛股没有结果")
 	}
 }
 
@@ -294,12 +295,33 @@ func WenSearchLongHuData(stockQues string) {
 		global.Zlog.Info("请求出错：" +err.Error())
 		return
 	}
-	rJson,_ := json.Marshal(stockRes)
-	global.Zlog.Info("返回结果：" +string(rJson))
+	//rJson,_ := json.Marshal(stockRes)
+	//global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
-	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
-	fmt.Println(stockResSearchDatas)
-	fmt.Println(sdate)
+	var thxLonghuStock model.ThxLonghuStock
+	fieldNameMap := map[string]string{
+		"IndividualCode" : "股票简称",
+		"IndividualName" : "code",
+		"UpPname" : "上市板块",
+		"UpReason" : "上榜原因",
+		"NowPrice" : "最新价",
+		"RoseRatio" : "最新涨跌幅",
+		"BuyValue" : "营业部买入金额合计",
+		"SellValue" : "营业部卖出金额合计",
+		"RealValue" : "营业部净额合计",
+	}
+	hourNum := 24
+	if time.Now().Hour() > 15 {
+		hourNum = 0
+	}
+	value,_ := wc.handleWcData(stockResSearchDatas, time.Duration(hourNum),&thxLonghuStock,fieldNameMap)
+	for _, rv := range value {
+		err := json.Unmarshal(rv,&thxLonghuStock)
+		if err != nil {
+			return
+		}
+		global.Gdb.Create(&thxLonghuStock)
+	}
 }
 
 func getHexinV() string {
