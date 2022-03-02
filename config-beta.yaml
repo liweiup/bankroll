@@ -7,12 +7,12 @@ redis:
 
 # email configuration
 email:
-  to: 'xxx@qq.com'
-  port: 465
-  from: 'xxx@163.com'
-  host: 'smtp.163.com'
+  to: '321327476@qq.com'
+  #  port: 465
+  from: 'liwei.job@foxmail.com'
+  host: 'smtp.qq.com'
   is-ssl: true
-  secret: 'xxx'
+  secret: 'urpoikarjrofbaej'
   nickname: 'test'
 
 # system configuration
