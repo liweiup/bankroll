@@ -183,7 +183,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 	global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
 	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
-	szSdate := strings.Replace(time.Now().Add(time.Hour * 24).Format(config.DayOut), "-", "", -1)
+	szSdate := strings.Replace(time.Now().Add(-time.Hour * 24).Format(config.DayOut), "-", "", -1)
 	global.Zlog.Info("问题：" + stockQues)
 	stockMapArr := []map[string]string{}
 	for _, v := range stockResSearchDatas.MustArray() {
