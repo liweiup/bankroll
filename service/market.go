@@ -183,6 +183,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 	global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
 	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
+	szSdate := strings.Replace(time.Now().Add(time.Hour * 24).Format(config.DayOut), "-", "", -1)
 	global.Zlog.Info("问题：" + stockQues)
 	stockMapArr := []map[string]string{}
 	for _, v := range stockResSearchDatas.MustArray() {
@@ -190,17 +191,17 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		vmap := v.(map[string]interface{})
 		vjson, _ := json.Marshal(vmap)
 		global.Zlog.Info(string(vjson))
-		//确保同只股票邮件只发一次
-		flagNum := 0
-		for _, e := range emailFlagArr {
-			if e == vmap["股票简称"].(string) {
-				flagNum = 1
-			}
-		}
-		if flagNum == 1 {
-			continue
-		}
 		if vmap["股票简称"] != nil {
+			//确保同只股票邮件只发一次
+			flagNum := 0
+			for _, e := range emailFlagArr {
+				if e == vmap["股票简称"].(string) {
+					flagNum = 1
+				}
+			}
+			if flagNum == 1 {
+				continue
+			}
 			emailFlagArr = append(emailFlagArr, vmap["股票简称"].(string))
 			stockMap["a-股票简称"] = vmap["股票简称"].(string) + "\n"
 			emailText += "a-股票简称: " + stockMap["a-股票简称"]
@@ -248,8 +249,8 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 			emailText += "i-市盈率(pe): " + stockMap["i-市盈率(pe)"]
 		}
 		scNum := 0.00
-		if vmap["a股市值(不含限售股)["+sdate+"]"] != nil {
-			scNum, _ = strconv.ParseFloat(vmap["a股市值(不含限售股)["+sdate+"]"].(string), 64)
+		if vmap["a股市值(不含限售股)["+szSdate+"]"] != nil {
+			scNum, _ = strconv.ParseFloat(vmap["a股市值(不含限售股)["+szSdate+"]"].(string), 64)
 			stockMap["j-a股市值(不含限售股)"] = utils.ConvertNumToCap(scNum) + "\n"
 			emailText += "j-a股市值(不含限售股): " + stockMap["j-a股市值(不含限售股)"]
 		}
