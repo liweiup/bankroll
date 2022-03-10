@@ -138,6 +138,8 @@ var emailFlagArr = []string{}
 var plateCacheKey = "PLATE:CACHE"
 func WenSearchBiddingData(plateQues, stockQues string) {
 	wc := WenCai{plateQues,WenCaiZhiShu}
+	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
+	token := utils.GetToken()
 	emailText,plateStrSearch := "",""
 	//获取缓存里的题材
 	plateCacheStr, _ := redigo.Dtype.String.Get(plateCacheKey).String()
@@ -160,6 +162,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 			plateArr = append(plateArr, zsName)
 		}
 		if len(plateArr) < 1 {
+			utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股","没有板块结果",sdate));
 			utils.SendEmail("集合竞价筛股", "问题："+plateQues+"\n 结果：没有板块结果")
 			return
 		} else {
@@ -178,18 +181,17 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		global.Zlog.Info("请求出错：" +err.Error())
 		return
 	}
-	rJson,_ := json.Marshal(stockRes)
-	global.Zlog.Info("返回结果：" +string(rJson))
+	//rJson,_ := json.Marshal(stockRes)
+	//global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
-	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
 	szSdate := strings.Replace(time.Now().Add(-time.Hour * 24).Format(config.DayOut), "-", "", -1)
 	global.Zlog.Info("问题：" + stockQues)
-	stockMapArr := []map[string]string{}
 	for _, v := range stockResSearchDatas.MustArray() {
+		emailText = ""
 		stockMap := map[string]string{}
 		vmap := v.(map[string]interface{})
-		vjson, _ := json.Marshal(vmap)
-		global.Zlog.Info(string(vjson))
+		//vjson, _ := json.Marshal(vmap)
+		//global.Zlog.Info(string(vjson))
 		if vmap["股票简称"] != nil {
 			//确保同只股票邮件只发一次
 			flagNum := 0
@@ -239,7 +241,6 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 			emailText += "g-macd(dea值): " + stockMap["g-macd(dea值)"]
 		}
 		if vmap["上市天数["+sdate+"]"] != nil {
-			fmt.Println( vmap["上市天数["+sdate+"]"])
 			stockMap["h-上市天数"] = string(vmap["上市天数["+sdate+"]"].(json.Number) + "\n")
 			emailText += "h-上市天数: " + stockMap["h-上市天数"]
 		}
@@ -276,17 +277,12 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		//计算总的因子
 		stockMap["n-总因子"] = fmt.Sprintf("%.4f",yzCount * szyz)
 		emailText += "n-总因子: " + stockMap["n-总因子"]
-		emailText += "\n\n"
-		stockMapArr = append(stockMapArr, stockMap)
+		//o7Plv6I7NfqeRkFPTh1BD4_dWD00
+		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc,o7Plv6I7NfqeRkFPTh1BD4_dWD00","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股",emailText,sdate));
 	}
-	token := utils.GetToken()
-	if emailText != "" {
-		log.Println(emailText)
-		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股",emailText,sdate));
-		//utils.SendEmail("集合竞价筛股", emailText)
-	} else {
-		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股",emailText,sdate));
+	if emailText == "" {
 		log.Println("集合竞价筛股没有结果")
+		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc,o7Plv6I7NfqeRkFPTh1BD4_dWD00","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股","集合竞价筛股没有结果",sdate));
 	}
 }
 

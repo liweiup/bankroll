@@ -7,6 +7,8 @@ import (
 	"bankroll/service/model"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 )
 
 const wxTokenKey = config.RedisKey + "WX:TOKEN"
@@ -35,32 +37,35 @@ func GetToken() string{
 	return token.AccessToken
 }
 
-func SendMsg(token,msgJson string) {
+func SendMsg(token string,msgJsonArr []string) {
 	atoken, err := redigo.Dtype.String.Get(wxTokenKey).String()
 	if err != nil {
 		global.Zlog.Info("微信消息推送错误：" + err.Error())
 		return
 	}
 	url := global.Config.Else.WxPreurl + fmt.Sprintf("message/template/send?access_token=%s",atoken)
-	batchorder, err := HttpPostRequestBatchorder(url, msgJson, nil)
-	if err != nil {
-		return
+	for _, msgJson := range msgJsonArr {
+		batchorder, err := HttpPostRequestBatchorder(url, msgJson, nil)
+		if err != nil {
+			continue
+		}
+		log.Println(batchorder)
 	}
-	fmt.Println(batchorder)
 }
 
-func GetModelMsg(Touser,TemplateID,URL,Value1,Value2,Value3 string) string {
-	wxPushData := new(model.WxPushModel)
-	wxPushData.Touser = Touser
-	wxPushData.TemplateID = TemplateID
-	wxPushData.URL = URL
-	wxPushData.Data.First.Value = Value1
-	wxPushData.Data.Keyword1.Value = Value2
-	wxPushData.Data.Keyword2.Value = Value3
-	marshal, err := json.Marshal(wxPushData)
-	if err != nil {
-		global.Zlog.Info("msg json error:" + err.Error())
-		return ""
+func GetModelMsg(Touser,TemplateID,URL,Value1,Value2,Value3 string) []string {
+	toUserArr := strings.Split(Touser,",")
+	wxPushDataArr := []string{}
+	for _, v := range toUserArr {
+		wxPushData := new(model.WxPushModel)
+		wxPushData.Touser = v
+		wxPushData.TemplateID = TemplateID
+		wxPushData.URL = URL
+		wxPushData.Data.First.Value = Value1
+		wxPushData.Data.Keyword1.Value = Value2
+		wxPushData.Data.Keyword2.Value = Value3
+		marshal, _ := json.Marshal(wxPushData)
+		wxPushDataArr = append(wxPushDataArr,string(marshal))
 	}
-	return string(marshal)
+	return wxPushDataArr
 }
