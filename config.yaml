@@ -93,3 +93,9 @@ zap:
   encode-level: LowercaseColorLevelEncoder
   stacktrace-key: stacktrace
   log-in-console: true
+
+else:
+  wx-appid: 'wxcf3861e0818616ab'
+  wx-secret: 'b5ae449ffa1601542a6b71dab3b7454d'
+  wx-preurl: 'https://api.weixin.qq.com/cgi-bin/'
+

@@ -1,0 +1,66 @@
+package utils
+
+import (
+	"bankroll/config"
+	"bankroll/global"
+	"bankroll/global/redigo"
+	"bankroll/service/model"
+	"encoding/json"
+	"fmt"
+)
+
+const wxTokenKey = config.RedisKey + "WX:TOKEN"
+type token struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn int64 `json:"expires_in"`
+}
+func GetToken() string{
+	url := global.Config.Else.WxPreurl + fmt.Sprintf("token?grant_type=client_credential&appid=%s&secret=%s",global.Config.Else.WxAppid,global.Config.Else.WxSecret)
+	atoken, err := redigo.Dtype.String.Get(wxTokenKey).String()
+	if atoken != "" {
+		return atoken
+	}
+	request, err := HttpGetRequest(url,nil,nil)
+	if err != nil {
+		global.Zlog.Info("微信获取token错误：" + err.Error())
+		return ""
+	}
+	var token token
+	err = json.Unmarshal([]byte(request), &token)
+	if err != nil {
+		global.Zlog.Info("微信解析token错误：" + err.Error())
+		return ""
+	}
+	redigo.Dtype.String.Set(wxTokenKey,token.AccessToken, token.ExpiresIn)
+	return token.AccessToken
+}
+
+func SendMsg(token,msgJson string) {
+	atoken, err := redigo.Dtype.String.Get(wxTokenKey).String()
+	if err != nil {
+		global.Zlog.Info("微信消息推送错误：" + err.Error())
+		return
+	}
+	url := global.Config.Else.WxPreurl + fmt.Sprintf("message/template/send?access_token=%s",atoken)
+	batchorder, err := HttpPostRequestBatchorder(url, msgJson, nil)
+	if err != nil {
+		return
+	}
+	fmt.Println(batchorder)
+}
+
+func GetModelMsg(Touser,TemplateID,URL,Value1,Value2,Value3 string) string {
+	wxPushData := new(model.WxPushModel)
+	wxPushData.Touser = Touser
+	wxPushData.TemplateID = TemplateID
+	wxPushData.URL = URL
+	wxPushData.Data.First.Value = Value1
+	wxPushData.Data.Keyword1.Value = Value2
+	wxPushData.Data.Keyword2.Value = Value3
+	marshal, err := json.Marshal(wxPushData)
+	if err != nil {
+		global.Zlog.Info("msg json error:" + err.Error())
+		return ""
+	}
+	return string(marshal)
+}

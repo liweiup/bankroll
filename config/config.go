@@ -10,6 +10,7 @@ type Server struct {
 	// oss
 	Local      Local      `mapstructure:"local" json:"local" yaml:"local"`
 	Timer      Timer      `mapstructure:"timer" json:"timer" yaml:"timer"`
+	Else      Else      `mapstructure:"else" json:"else" yaml:"else"`
 }
 
 const (

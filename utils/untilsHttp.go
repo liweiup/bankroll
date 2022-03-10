@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -57,10 +58,13 @@ func HttpGetRequest(strUrl string, mapParams,headerParams map[string]string) (st
 	}
 	return resBody,nil
 }
-func HttpPostRequestBatchorder(strUrl string, mapParams map[string]string,headerParams map[string]string) (string,error) {
+func HttpPostRequestBatchorder(strUrl string, mapParams interface{},headerParams map[string]string) (string,error) {
 	httpClient := &http.Client{}
 	jsonParams := ""
-	if nil != mapParams {
+	switch reflect.TypeOf(mapParams).Kind() {
+	case reflect.String:
+		jsonParams = mapParams.(string)
+	case reflect.Map:
 		bytesParams, _ := json.Marshal(mapParams)
 		jsonParams = string(bytesParams)
 	}

@@ -126,3 +126,28 @@ type BiDealDetail struct {
 func (BiDealDetail) TableName() string {
 	return "bi_deal_detail"
 }
+
+//微信推送模版
+type WxPushModel struct {
+	Touser string `json:"touser"`
+	TemplateID string `json:"template_id"`
+	URL string `json:"url"`
+	Data struct {
+		First struct {
+			Value string `json:"value"`
+			Color string `json:"color"`
+		} `json:"first"`
+		Keyword1 struct {
+			Value string `json:"value"`
+			Color string `json:"color"`
+		} `json:"keyword1"`
+		Keyword2 struct {
+			Value string `json:"value"`
+			Color string `json:"color"`
+		} `json:"keyword2"`
+		Remark struct {
+			Value string `json:"value"`
+			Color string `json:"color"`
+		} `json:"remark"`
+	} `json:"data"`
+}

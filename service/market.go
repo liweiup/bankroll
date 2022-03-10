@@ -28,7 +28,6 @@ const (
 	IndustryStock FundType = "ggzjld" //个股详细数据
 	Plate         FundType = "plate"  //板块
 	Report        FundType = "report" //板块
-
 	//问财
 	WenCaiZhiShu FundType = "zhishu" //板块指数
 	WenCaiStock  FundType = "stock"  //股票
@@ -183,7 +182,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 	global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
 	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
-	szSdate := strings.Replace(time.Now().Add(time.Hour * 24).Format(config.DayOut), "-", "", -1)
+	szSdate := strings.Replace(time.Now().Add(-time.Hour * 24).Format(config.DayOut), "-", "", -1)
 	global.Zlog.Info("问题：" + stockQues)
 	stockMapArr := []map[string]string{}
 	for _, v := range stockResSearchDatas.MustArray() {
@@ -280,10 +279,13 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		emailText += "\n\n"
 		stockMapArr = append(stockMapArr, stockMap)
 	}
+	token := utils.GetToken()
 	if emailText != "" {
 		log.Println(emailText)
-		utils.SendEmail("集合竞价筛股", emailText)
+		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股",emailText,sdate));
+		//utils.SendEmail("集合竞价筛股", emailText)
 	} else {
+		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股",emailText,sdate));
 		log.Println("集合竞价筛股没有结果")
 	}
 }

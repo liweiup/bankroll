@@ -3,6 +3,7 @@ package main
 import (
 	"bankroll/global"
 	"bankroll/initialize"
+	"bankroll/service"
 )
 
 func main() {
@@ -16,9 +17,11 @@ func main() {
 		db, _ := global.Gdb.DB()
 		defer db.Close()
 	}
-	initialize.RunWindowsServer()
+	//fmt.Println(global.Config.Else)
+	//fmt.Println(global.Config.Mysql)
+
 	//for i := 0; i < 5; i++ {
-	//service.WenSearchBiddingData("上个交易日板块热度前4；非同花顺特色指数；非同花顺地域概念；上个交易日涨停家数大于8","涨跌幅大于0%且涨跌幅小于30%；量比大于2；委比大于50%；上市天数大于1年；流通市值小于300亿；非st的股票；macd零轴上；近1年涨跌幅小于50%；近10个交易日涨幅大于10%且小于40%；同花顺行业；不包含创业板股票；")
+	service.WenSearchBiddingData("上个交易日板块热度前4；非同花顺特色指数；非同花顺地域概念；","涨跌幅大于0%且涨跌幅小于30%；量比大于2；委比大于50%；上市天数大于1年；流通市值小于300亿；非st的股票；macd零轴上；近1年涨跌幅小于50%；近10个交易日涨幅大于10%且小于40%；同花顺行业；不包含创业板股票；")
 	//service.WenSearchLongHuData("龙虎榜；不含科创板")
 	//}
 	//service.SetReportCodeToRedis()
