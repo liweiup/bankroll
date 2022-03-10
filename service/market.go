@@ -249,7 +249,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		}
 		scNum := 0.00
 		if vmap["a股市值(不含限售股)["+szSdate+"]"] != nil {
-			scNum, _ = strconv.ParseFloat(vmap["a股市值(不含限售股)["+szSdate+"]"].(string), 64)
+			scNum, _ = strconv.ParseFloat(string(vmap["a股市值(不含限售股)["+szSdate+"]"].(json.Number)), 64)
 			stockMap["j-a股市值(不含限售股)"] = utils.ConvertNumToCap(scNum) + "\n"
 			emailText += "j-a股市值(不含限售股): " + stockMap["j-a股市值(不含限售股)"]
 		}

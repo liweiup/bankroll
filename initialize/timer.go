@@ -16,6 +16,12 @@ func Timer() {
 		service.MarketGetBankRoll(service.Conception, "je", 1, 300)
 		service.MarketGetBankRoll(service.Individual, "money", 1, 5000)
 	})
+	id, _ = global.Timer.AddTaskByFunc("test1", "0/59 22-23 * * 1-5", func() {
+		service.MarketGetPlateBankroll(1000)
+		service.MarketGetBankRoll(service.Industry, "je", 1, 100)
+		service.MarketGetBankRoll(service.Conception, "je", 1, 300)
+		service.MarketGetBankRoll(service.Individual, "money", 1, 5000)
+	})
 	global.Zlog.Warn(fmt.Sprintf("板块资金|概念资金|个股资金 定时任务Id：%d ", id))
 
 	id, _ = global.Timer.AddTaskByFunc("test2", "30 1 1 * * ", func() {
