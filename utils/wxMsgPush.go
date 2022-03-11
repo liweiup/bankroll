@@ -38,12 +38,7 @@ func GetToken() string{
 }
 
 func SendMsg(token string,msgJsonArr []string) {
-	atoken, err := redigo.Dtype.String.Get(wxTokenKey).String()
-	if err != nil {
-		global.Zlog.Info("微信消息推送错误：" + err.Error())
-		return
-	}
-	url := global.Config.Else.WxPreurl + fmt.Sprintf("message/template/send?access_token=%s",atoken)
+	url := global.Config.Else.WxPreurl + fmt.Sprintf("message/template/send?access_token=%s",token)
 	for _, msgJson := range msgJsonArr {
 		batchorder, err := HttpPostRequestBatchorder(url, msgJson, nil)
 		if err != nil {
