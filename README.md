@@ -10,6 +10,8 @@
 
 **需要拿去玩吧
 
+**更新。。。加上了微信的模版提醒，需要自行配置公众号
+
 **表结构在cofig文件夹 **
 
 ![image](https://user-images.githubusercontent.com/20676490/154520321-c630c0cf-597b-4e07-80b6-70f2b610a7d7.png)
