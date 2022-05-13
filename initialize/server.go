@@ -3,9 +3,10 @@ package initialize
 import (
 	"bankroll/global"
 	"fmt"
+	"time"
+
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 type server interface {

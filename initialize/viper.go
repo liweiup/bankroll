@@ -14,7 +14,7 @@ import (
 func Viper(path ...string) *viper.Viper {
 	var conf string
 	if len(path) == 0 {
-		flag.StringVar(&conf,"c","","choose config file.")
+		flag.StringVar(&conf, "c", "", "choose config file.")
 		flag.Parse()
 		if conf == "" {
 			conf = config.ConfigFile
@@ -28,7 +28,7 @@ func Viper(path ...string) *viper.Viper {
 	v.SetConfigType("yaml")
 	err := v.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err.Error()))
+		fmt.Println(err.Error())
 	}
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {

@@ -33,9 +33,6 @@ const (
 	WenCaiStock  FundType = "stock"  //股票
 )
 
-
-
-
 var hd HandleDataInfo
 
 //获取 个股|行业|概念 资金数据
@@ -136,11 +133,12 @@ func MarketGetStockReport() {
 
 var emailFlagArr = []string{}
 var plateCacheKey = "PLATE:CACHE"
+
 func WenSearchBiddingData(plateQues, stockQues string) {
-	wc := WenCai{plateQues,WenCaiZhiShu}
+	wc := WenCai{plateQues, WenCaiZhiShu}
 	sdate := strings.Replace(time.Now().Format(config.DayOut), "-", "", -1)
 	token := utils.GetToken()
-	emailText,plateStrSearch := "",""
+	emailText, plateStrSearch := "", ""
 	//获取缓存里的题材
 	plateCacheStr, _ := redigo.Dtype.String.Get(plateCacheKey).String()
 	if plateCacheStr != "" {
@@ -148,43 +146,45 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 	} else {
 		res, err := wc.WenCaiSearch()
 		if err != nil {
-			global.Zlog.Info("请求出错：" +err.Error())
+			global.Zlog.Info("请求出错：" + err.Error())
 			return
 		}
 		searchDatas := res.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
 		plateArr := []string{}
-		delPlateArr := []string{"壳资源","新股与次新股","ST板块","融资融券","核准制次新股","创投","摘帽"}
+		delPlateArr := []string{"壳资源", "新股与次新股", "ST板块", "融资融券", "核准制次新股", "创投", "摘帽"}
 		for _, v := range searchDatas.MustArray() {
 			zsName := v.(map[string]interface{})["指数简称"].(string)
-			if arrays.ContainsString(delPlateArr,zsName) != -1 {
+			if arrays.ContainsString(delPlateArr, zsName) != -1 {
 				continue
 			}
 			plateArr = append(plateArr, zsName)
 		}
 		if len(plateArr) < 1 {
-			utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股","没有板块结果",sdate));
+			if token != "" {
+				utils.SendMsg(token, utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc", "xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s", "", "集合竞价筛股", "没有板块结果", sdate))
+			}
 			utils.SendEmail("集合竞价筛股", "问题："+plateQues+"\n 结果：没有板块结果")
 			return
 		} else {
 			plateStrSearch = strings.Join(plateArr, "或")
-			redigo.Dtype.String.Set(plateCacheKey,plateStrSearch,5 * 60)
+			redigo.Dtype.String.Set(plateCacheKey, plateStrSearch, 5*60)
 		}
 	}
 	//查询股票的条件
 	if plateStrSearch != "" {
-		stockQues += "行业属于"+plateStrSearch
+		stockQues += "行业属于" + plateStrSearch
 	}
 	wc.Question = stockQues
 	wc.fundtype = WenCaiStock
 	stockRes, err := wc.WenCaiSearch()
 	if err != nil {
-		global.Zlog.Info("请求出错：" +err.Error())
+		global.Zlog.Info("请求出错：" + err.Error())
 		return
 	}
 	//rJson,_ := json.Marshal(stockRes)
 	//global.Zlog.Info("返回结果：" +string(rJson))
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
-	szSdate := strings.Replace(time.Now().Add(-time.Hour * 24).Format(config.DayOut), "-", "", -1)
+	szSdate := strings.Replace(time.Now().Add(-time.Hour*24).Format(config.DayOut), "-", "", -1)
 	global.Zlog.Info("问题：" + stockQues)
 	for _, v := range stockResSearchDatas.MustArray() {
 		emailText = ""
@@ -222,7 +222,7 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 			emailText += "d-涨跌幅:前复权: " + stockMap["d-涨跌幅:前复权"]
 			if vmap["最新价"] != nil {
 				newPrice, _ := strconv.ParseFloat(vmap["最新价"].(string), 64)
-				stockMap["dd-最新价"] += fmt.Sprintf("%.2f",newPrice) + "  涨10%价：" + fmt.Sprintf("%.2f",newPrice * 1.1)
+				stockMap["dd-最新价"] += fmt.Sprintf("%.2f", newPrice) + "  涨10%价：" + fmt.Sprintf("%.2f", newPrice*1.1)
 				emailText += "dd-最新价: " + stockMap["dd-最新价"] + "\n"
 			}
 		}
@@ -270,28 +270,32 @@ func WenSearchBiddingData(plateQues, stockQues string) {
 		}
 		szyz := 0.00
 		if stockMap["j-a股市值(不含限售股)"] != "" {
-			szyz =  6000000000 / scNum
-			stockMap["m-市值因子"] = fmt.Sprintf("%.4f",szyz)
+			szyz = 6000000000 / scNum
+			stockMap["m-市值因子"] = fmt.Sprintf("%.4f", szyz)
 			emailText += "m-市值因子: " + stockMap["m-市值因子"] + "\n"
 		}
 		//计算总的因子
-		stockMap["n-总因子"] = fmt.Sprintf("%.4f",yzCount * szyz)
+		stockMap["n-总因子"] = fmt.Sprintf("%.4f", yzCount*szyz)
 		emailText += "n-总因子: " + stockMap["n-总因子"]
 		//o7Plv6I7NfqeRkFPTh1BD4_dWD00
-		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc,o7Plv6I7NfqeRkFPTh1BD4_dWD00","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股",emailText,sdate));
+		if token != "" {
+			utils.SendMsg(token, utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc,o7Plv6I7NfqeRkFPTh1BD4_dWD00", "xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s", "", "集合竞价筛股", emailText, sdate))
+		}
 	}
 	if emailText == "" {
 		log.Println("集合竞价筛股没有结果")
-		utils.SendMsg(token,utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc,o7Plv6I7NfqeRkFPTh1BD4_dWD00","xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s","","集合竞价筛股","集合竞价筛股没有结果",sdate));
+		if token != "" {
+			utils.SendMsg(token, utils.GetModelMsg("o7Plv6DecgmxbdFJKzwysnxM4_mc,o7Plv6I7NfqeRkFPTh1BD4_dWD00", "xGBpZCsR9pOil-LzhEH0Q73Ul-SZjQK2M5ZO50NsN0s", "", "集合竞价筛股", "集合竞价筛股没有结果", sdate))
+		}
 	}
 }
 
 //龙虎榜数据获取
 func WenSearchLongHuData(stockQues string) {
-	wc := WenCai{stockQues,WenCaiStock}
+	wc := WenCai{stockQues, WenCaiStock}
 	stockRes, err := wc.WenCaiSearch()
 	if err != nil {
-		global.Zlog.Info("请求出错：" +err.Error())
+		global.Zlog.Info("请求出错：" + err.Error())
 		return
 	}
 	//rJson,_ := json.Marshal(stockRes)
@@ -299,23 +303,23 @@ func WenSearchLongHuData(stockQues string) {
 	stockResSearchDatas := stockRes.Get("data").Get("answer").GetIndex(0).Get("txt").GetIndex(0).Get("content").Get("components").GetIndex(0).Get("data").Get("datas")
 	var thxLonghuStock model.ThxLonghuStock
 	fieldNameMap := map[string]string{
-		"IndividualCode" : "股票简称",
-		"IndividualName" : "code",
-		"UpPname" : "上市板块",
-		"UpReason" : "上榜原因",
-		"NowPrice" : "最新价",
-		"RoseRatio" : "最新涨跌幅",
-		"BuyValue" : "营业部买入金额合计",
-		"SellValue" : "营业部卖出金额合计",
-		"RealValue" : "营业部净额合计",
+		"IndividualCode": "股票简称",
+		"IndividualName": "code",
+		"UpPname":        "上市板块",
+		"UpReason":       "上榜原因",
+		"NowPrice":       "最新价",
+		"RoseRatio":      "最新涨跌幅",
+		"BuyValue":       "营业部买入金额合计",
+		"SellValue":      "营业部卖出金额合计",
+		"RealValue":      "营业部净额合计",
 	}
 	hourNum := 24
 	if time.Now().Hour() > 15 {
 		hourNum = 0
 	}
-	value,_ := wc.handleWcData(stockResSearchDatas, time.Duration(hourNum),&thxLonghuStock,fieldNameMap)
+	value, _ := wc.handleWcData(stockResSearchDatas, time.Duration(hourNum), &thxLonghuStock, fieldNameMap)
 	for _, rv := range value {
-		err := json.Unmarshal(rv,&thxLonghuStock)
+		err := json.Unmarshal(rv, &thxLonghuStock)
 		if err != nil {
 			return
 		}
